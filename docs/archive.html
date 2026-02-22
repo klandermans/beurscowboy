@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archief | MarketInsights</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .archive-nav {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .archive-nav button {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .archive-nav button:hover,
+        .archive-nav button.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        .archive-list {
+            list-style: none;
+        }
+        .archive-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .archive-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+        .archive-date {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .archive-stats {
+            display: flex;
+            gap: 24px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .archive-link {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .no-archives {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" class="logo-link">
+                    <span class="logo-icon">📈</span>
+                    <span class="logo-text">Market<span class="highlight">Insights</span></span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="index.html">Markten</a>
+                <a href="analysis.html">Analyse</a>
+                <a href="watchlist.html">Watchlist</a>
+                <a href="archive.html" class="active">Archief</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <button class="search-toggle" id="searchToggle">🔍</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="search-bar" id="searchBar">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Zoek in archief...">
+            <button class="search-close" id="searchClose">✕</button>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <section class="content-section">
+            <div class="section-header">
+                <h1>Archief</h1>
+                <p class="section-subtitle">Eerdere marktanalyses en rapporten</p>
+            </div>
+
+            <div class="archive-nav">
+                <button class="active" data-period="all">Alle</button>
+                <button data-period="week">Deze Week</button>
+                <button data-period="month">Deze Maand</button>
+            </div>
+
+            <ul class="archive-list" id="archive-list">
+                <li class="archive-item">
+                    <div>
+                        <span class="archive-date">22 februari 2026</span>
+                        <div class="archive-stats">
+                            <span>14 aandelen</span>
+                            <span>4 Koop signals</span>
+                        </div>
+                    </div>
+                    <a href="index.html" class="archive-link">Bekijk →</a>
+                </li>
+            </ul>
+
+            <div class="no-archives" id="no-archives" style="display: none;">
+                <p>Nog geen archief beschikbaar. Dagelijkse rapporten worden automatisch gegenereerd.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>MarketInsights</h4>
+                    <p>Dagelijkse marktanalyse powered by AI</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Disclaimer</h4>
+                    <p>Dit is geen financieel advies. Trading brengt risico's met zich mee.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Data Bronnen</h4>
+                    <p>Prijzen: Yahoo Finance<br>Sentiment: Qwen LLM</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MarketInsights. Alle rechten voorbehouden.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/main.js"></script>
+    <script>
+        // Archive filtering
+        document.querySelectorAll('.archive-nav button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.archive-nav button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const period = this.dataset.period;
+                const items = document.querySelectorAll('.archive-item');
+                
+                items.forEach(item => {
+                    if (period === 'all') {
+                        item.style.display = 'flex';
+                    } else {
+                        // Filter logic would go here
+                        item.style.display = 'flex';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

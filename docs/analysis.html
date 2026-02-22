@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markt Analyse | MarketInsights</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" class="logo-link">
+                    <span class="logo-icon">📈</span>
+                    <span class="logo-text">Market<span class="highlight">Insights</span></span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="index.html">Markten</a>
+                <a href="analysis.html" class="active">Analyse</a>
+                <a href="watchlist.html">Watchlist</a>
+                <a href="archive.html">Archief</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <button class="search-toggle" id="searchToggle">🔍</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="search-bar" id="searchBar">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Zoek aandelen, sectoren, signals...">
+            <button class="search-close" id="searchClose">✕</button>
+        </div>
+    </div>
+
+    <main class="main-content article-page">
+        <section class="content-section">
+            <div class="section-header">
+                <h1>Dagelijkse Markt Analyse</h1>
+                <p class="section-subtitle">Diepgaande analyse van onze top picks</p>
+            </div>
+            
+            <div id="analysis-content">
+                <p class="text-center">Analyses worden dagelijks gegenereerd. Bekijk de homepage voor de laatste updates.</p>
+                <p class="text-center mt-4"><a href="index.html" class="read-more">Ga naar Markten →</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>MarketInsights</h4>
+                    <p>Dagelijkse marktanalyse powered by AI</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Disclaimer</h4>
+                    <p>Dit is geen financieel advies. Trading brengt risico's met zich mee.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Data Bronnen</h4>
+                    <p>Prijzen: Yahoo Finance<br>Sentiment: Qwen LLM</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MarketInsights. Alle rechten voorbehouden.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/main.js"></script>
+</body>
+</html>
