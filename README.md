@@ -31,6 +31,81 @@ Beurs Cowboy is een **100% gratis** geautomatiseerd platform dat dagelijks markt
 
 ---
 
+## 🔄 Hoe Het Werkt
+
+### Dagelijkse Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  1. GitHub Actions trigger (06:30 UTC of handmatig)            │
+│                    ↓                                            │
+│  2. Python script start op GitHub runner                        │
+│                    ↓                                            │
+│  3. Haalt 138+ aandelen op via Yahoo Finance                    │
+│     - Prijs, volume, RSI, MACD, Moving Averages                 │
+│     - 52-week high/low, ATR (volatiliteit)                      │
+│                    ↓                                            │
+│  4. Berekent technische setups                                  │
+│     - Trend analyse (bullish/bearish)                           │
+│     - Momentum signals                                          │
+│     - Potentiële upside                                         │
+│                    ↓                                            │
+│  5. Genereert HTML pagina's                                     │
+│     - index.html (markt overzicht)                              │
+│     - analysis.html (gedetailleerde analyse)                    │
+│     - watchlist.html (aandelen om te volgen)                    │
+│     - archive.html (historie)                                   │
+│                    ↓                                            │
+│  6. Commit & push naar docs/ folder                             │
+│                    ↓                                            │
+│  7. GitHub Pages publiceert site automatisch                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Technische Analyse
+
+Het script berekent voor elk aandeel:
+
+| Indicator | Beschrijving | Gebruik |
+|-----------|--------------|---------|
+| **RSI** | Relative Strength Index (14 dagen) | Bepaalt overbought/oversold |
+| **MACD** | Moving Average Convergence Divergence | Momentum indicator |
+| **SMA 20/50** | Simple Moving Average | Trend richting |
+| **ATR** | Average True Range | Volatiliteit |
+| **Volume Rank** | Volume t.o.v. afgelopen jaar | Handelsactiviteit |
+
+### Signal Berekening
+
+```python
+# Vereenvoudigde logica
+setup_score = RSI_score + MACD_score + MA_alignement + volatiliteit
+sentiment_score = keyword_analyse(nieuws_headlines)
+totaal_score = setup_score + (sentiment_score * 3)
+
+if totaal_score >= 4 AND upside >= 5%:
+    signal = "Sterk Koop"
+elif totaal_score >= 2:
+    signal = "Koop"
+elif totaal_score >= 0:
+    signal = "Neutraal"
+elif totaal_score >= -2:
+    signal = "Voorzichtig"
+else:
+    signal = "Verkoop"
+```
+
+### Watchlist Logica
+
+De watchlist toont aandelen die:
+- Een positieve setup score hebben (`>= 0`)
+- Nog geen duidelijk "Koop" signaal hebben (`Neutraal` of `Voorzichtig`)
+- Minimaal 2% potentieel hebben
+- Maximaal 15 resultaten
+
+Dit zijn aandelen die je in de gaten moet houden - ze kunnen interessant worden als ze bepaalde niveaus breken.
+
+---
+
 ## ⚠️ Disclaimer
 
 **Dit is GEEN financieel advies.**
