@@ -1,22 +1,33 @@
 # 🤠 Beurs Cowboy
 
-**Dagelijkse beursanalyse met een westelijk tintje**
+**Dagelijkse beursanalyse - Volledig Gratis!**
 
 > "Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff."
 
 ---
 
+## ✨ Volledig Gratis!
+
+Geen credit card nodig, geen API keys:
+
+- ✅ **Yahoo Finance** - Gratis data en nieuws
+- ✅ **RSS Feeds** - Gratis markt nieuws
+- ✅ **Keyword Sentiment** - Geen dure LLM API's
+- ✅ **GitHub Actions** - Gratis automation
+- ✅ **GitHub Pages** - Gratis hosting
+
+---
+
 ## Over Beurs Cowboy
 
-Beurs Cowboy is een geautomatiseerd platform dat dagelijks marktanalyses genereert met:
+Beurs Cowboy is een **100% gratis** geautomatiseerd platform dat dagelijks marktanalyses genereert:
 
 - 📊 **Technische Analyse** - RSI, MACD, Moving Averages, ATR
-- 🧠 **AI Sentiment** - Qwen LLM analyseert nieuwsartikelen
-- 🎯 **Trading Signals** - Koop/Verkoop aanbevelingen met scores
-- 📱 **Volledig Responsive** - Werkt perfect op mobiel, tablet en desktop
-- 🌓 **Dark Mode** - Oogvriendelijk voor lange sessies
+- 📰 **Nieuws Analyse** - Yahoo Finance + RSS feeds
+- 🎯 **Trading Signals** - Koop/Verkoop aanbevelingen
+- 📱 **Volledig Responsive** - Mobiel, tablet, desktop
+- 🌓 **Dark Mode** - Oogvriendelijk
 - 🔍 **Zoekfunctie** - Snel aandelen vinden
-- 🤠 **Westelijke Charme** - Want trading moet ook leuk blijven
 
 ---
 
@@ -24,15 +35,14 @@ Beurs Cowboy is een geautomatiseerd platform dat dagelijks marktanalyses generee
 
 **Dit is GEEN financieel advies.**
 
-- Trading in aandelen brengt significante risico's met zich mee
-- Dit platform is voor educatieve en informatieve doeleinden
-- Raadpleeg een licensed financial advisor voor persoonlijk advies
+- Trading in aandelen brengt risico's met zich mee
+- Dit platform is voor educatieve doeleinden
+- Raadpleeg een financial advisor voor persoonlijk advies
 - Trade nooit met geld dat je niet kunt verliezen
-- De volgende black swan wordt waarschijnlijk getraind op een GPU cluster
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (5 minuten)
 
 ### 1. Repository Clonen
 
@@ -49,19 +59,7 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. API Key Instellen
-
-**DashScope API Key aanvragen:**
-1. Ga naar [Alibaba Cloud DashScope](https://dashscope.console.aliyun.com/)
-2. Maak account aan
-3. Kopieer API key
-
-**Environment variable:**
-```bash
-export DASHSCOPE_API_KEY=sk-jouw-api-key
-```
-
-### 4. Lokaal Testen
+### 3. Lokaal Testen
 
 ```bash
 python stock_analyzer.py
@@ -69,37 +67,33 @@ python stock_analyzer.py
 
 Open `docs/index.html` in je browser.
 
+**That's it!** Geen API keys, geen gedoe.
+
 ---
 
-## 🌐 GitHub Pages Setup
+## 🌐 GitHub Pages Setup (Optioneel)
 
 ### Stap 1: Enable GitHub Pages
 
 1. Ga naar **Settings** → **Pages**
-2. Bij "Source": Kies **Deploy from a branch**
+2. Kies **Deploy from a branch**
 3. Branch: **main** → Folder: **/docs**
 4. Klik **Save**
 
-### Stap 2: API Key als Secret Toevoegen
+### Stap 2: Workflow Testen
 
-1. Ga naar **Settings** → **Secrets and variables** → **Actions**
-2. Klik **New repository secret**
-3. Naam: `DASHSCOPE_API_KEY`
-4. Value: jouw API key
-5. Klik **Add secret**
-
-### Stap 3: Workflow Testen
-
-1. Ga naar **Actions** → **Daily Market Analysis**
+1. Ga naar **Actions** → **🤠 Beurs Cowboy**
 2. Klik **Run workflow**
-3. Wacht tot de workflow klaar is (~2-3 minuten)
+3. Wacht ~2 minuten
 
-### Stap 4: Site Bekijken
+### Stap 3: Site Bekijken
 
 Je site is nu beschikbaar op:
 ```
 https://jouw-username.github.io/jouw-repo/
 ```
+
+**Geen secrets nodig!** Alles is gratis.
 
 ---
 
@@ -107,23 +101,20 @@ https://jouw-username.github.io/jouw-repo/
 
 ```
 stockker/
-├── stock_analyzer.py          # Main analysis script
-├── requirements.txt           # Python dependencies
+├── stock_analyzer.py          # Main script (gratis analyse)
+├── requirements.txt           # Python dependencies (allemaal gratis)
 ├── README.md                  # Deze handleiding
-├── .env.example              # Environment template
 ├── .github/workflows/
-│   └── main.yml              # GitHub Actions workflow
-├── docs/                      # Website (wordt gehost op GitHub Pages)
+│   └── main.yml              # GitHub Actions (gratis CI/CD)
+├── docs/                      # Website (gratis hosting op GitHub Pages)
 │   ├── index.html            # Homepage
 │   ├── analysis.html         # Analyse pagina
-│   ├── watchlist.html        # Watchlist pagina
-│   ├── archive.html          # Archief pagina
-│   ├── article/              # Dagelijkse artikelen
-│   │   └── YYYY-MM-DD.html
+│   ├── watchlist.html        # Watchlist
+│   ├── archive.html          # Archief
 │   └── assets/
-│       ├── styles.css        # Styling met dark mode & responsive
-│       └── main.js           # Interactive features
-└── data_snapshots/           # Dagelijkse data exports
+│       ├── styles.css        # Styling
+│       └── main.js           # Interactive
+└── data_snapshots/           # Dagelijkse data
     └── snap_YYYY-MM-DD.json
 ```
 
@@ -132,34 +123,25 @@ stockker/
 ## 🎨 Features
 
 ### Responsive Design
-- **Mobile First** - Geoptimaliseerd voor mobiel
-- **Tablet Support** - Perfect op iPad en tablets
-- **Desktop Ready** - Volledige ervaring op desktop
-- **Touch Friendly** - Werkt great met touchscreens
+- ✅ **Mobile First** - Geoptimaliseerd voor mobiel
+- ✅ **Tablet Support** - Perfect op iPad
+- ✅ **Desktop Ready** - Volledige ervaring
+- ✅ **Touch Friendly** - Werkt met touchscreen
 
 ### Dark/Light Mode
-- Automatische theme detectie
-- Toggle knop in header
-- Opgeslagen voorkeur in localStorage
-- Volgt systeem voorkeur
+- ✅ Automatische detectie
+- ✅ Toggle in header
+- ✅ Opgeslagen voorkeur
 
 ### Zoekfunctie
-- Zoek op ticker, sector, of signal
-- Real-time filtering
-- Escape to sluiten
-- Keyboard support
+- ✅ Zoek op ticker, sector, signal
+- ✅ Real-time filtering
+- ✅ Keyboard support
 
 ### Table Filters
-- Filter op Koop/Neutraal/Verkoop signals
-- Sorteer op elke kolom (klik op header)
-- Responsive table met horizontal scroll
-- Keyboard accessible
-
-### Mobile Menu
-- Hamburger menu op mobiel
-- Smooth animaties
-- Sluit bij klik buiten menu
-- Scroll lock wanneer open
+- ✅ Filter op Koop/Neutraal/Verkoop
+- ✅ Sorteer op elke kolom
+- ✅ Responsive table
 
 ---
 
@@ -171,10 +153,9 @@ Edit `stock_analyzer.py`:
 
 ```python
 TICKERS = [
-    # Mega Cap Tech
     'AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META',
-    # Semiconductors
     'AMD', 'INTC', 'TSM', 'AVGO', 'QCOM', 'TXN',
+    'TSLA', 'RIVN', 'LCID', 'F', 'GM',
     # ... voeg toe wat je wilt
 ]
 ```
@@ -192,118 +173,106 @@ on:
 **Tijdzones:**
 - 06:30 UTC = 07:30 CET (Nederland/België)
 - 06:30 UTC = 01:30 EST (New York)
-- 06:30 UTC = 14:30 JST (Tokyo)
 
 ---
 
-## 🛠️ Technologies
+## 🛠️ Technologies (Allemaal Gratis!)
 
-| Component | Technologie |
-|-----------|-------------|
-| Backend | Python 3.11+ |
-| Data | yfinance, pandas, numpy |
-| AI/LLM | Qwen Agent (DashScope) |
-| Frontend | HTML5, CSS3, Vanilla JS |
-| Design | Custom (Beurs Cowboy theme) |
-| Hosting | GitHub Pages |
-| Automation | GitHub Actions |
+| Component | Technologie | Kosten |
+|-----------|-------------|--------|
+| Backend | Python 3.11+ | 🆓 Gratis |
+| Data | yfinance | 🆓 Gratis |
+| Nieuws | Yahoo Finance + RSS | 🆓 Gratis |
+| Sentiment | Keyword analysis | 🆓 Gratis |
+| Frontend | HTML5, CSS3, JS | 🆓 Gratis |
+| Hosting | GitHub Pages | 🆓 Gratis |
+| Automation | GitHub Actions | 🆓 Gratis |
+
+**Totaal:** €0,00 per maand!
 
 ---
 
 ## 📊 Signal Betekenissen
 
-| Signal | Betekenis | Score |
-|--------|-----------|-------|
-| 🟢 **Sterk Koop** | Sterke bullische setup | ≥4 + upside ≥5% |
-| 🟢 **Koop** | Bullische setup | ≥2 + upside ≥4% |
-| ⚪ **Neutraal** | Geen duidelijk signaal | 0 tot 2 |
-| 🔴 **Voorzichtig** | Bearish waarschuwing | -2 tot 0 |
-| 🔴 **Verkoop** | Bearish setup | <-2 |
+| Signal | Betekenis | Criteria |
+|--------|-----------|----------|
+| 🟢 **Sterk Koop** | Sterke bullische setup | Score ≥4 + upside ≥5% |
+| 🟢 **Koop** | Bullische setup | Score ≥2 + upside ≥4% |
+| ⚪ **Neutraal** | Geen duidelijk signaal | Score 0-2 |
+| 🔴 **Voorzichtig** | Bearish waarschuwing | Score -2 tot 0 |
+| 🔴 **Verkoop** | Bearish setup | Score <-2 |
 
 ---
 
 ## 📱 Responsive Breakpoints
 
-| Device | Width | Features |
-|--------|-------|----------|
-| Desktop | >1024px | Volledig menu, alle stats |
-| Tablet | ≤1024px | Hamburger menu, 2 koloms stats |
-| Mobile | ≤640px | Compact menu, 1 kolom layout |
-| Small Mobile | ≤380px | Minimal layout, logo only |
+| Device | Width | Layout |
+|--------|-------|--------|
+| Desktop | >1024px | Volledig menu |
+| Tablet | ≤1024px | Hamburger menu |
+| Mobile | ≤640px | Compact layout |
+| Small | ≤380px | Minimal |
 
 ---
 
 ## 🔧 Troubleshooting
 
-### Workflow faalt met "API Key Error"
-- Check of `DASHSCOPE_API_KEY` correct is ingesteld
-- Verify API key is actief op dashscope.console.aliyun.com
-- Check credits op je DashScope account
-
 ### "No data found" voor bepaalde tickers
 - Sommige tickers zijn mogelijk delisted
-- Check ticker symbol (bijv. ASML.AS voor Amsterdam)
+- Check ticker symbol (ASML.AS voor Amsterdam)
 - Yahoo Finance heeft soms rate limits
 
-### Site wordt niet geüpdatet
-- Check GitHub Actions logs voor errors
-- Verify GitHub Pages is ingesteld op /docs folder
-- Forceer een handmatige workflow run
+### Workflow wordt niet uitgevoerd
+- Check Actions tab voor errors
+- Verify GitHub Pages staat aan
+- Forceer handmatige run
 
-### Mobile menu werkt niet
-- Hard refresh (Ctrl+Shift+R / Cmd+Shift+R)
-- Check browser console voor errors
-- Clear cache en cookies
+### Sentiment lijkt niet te werken
+- Keyword analyse is eenvoudig (geen AI)
+- Werkt het beste met Engels nieuws
+- Score is indicatief
 
 ---
 
-## 📝 Dagelijkse Output
+## 📝 Wat Je Krijgt
 
-Elke run genereert:
+Elke ochtend automatisch:
 
-1. **Homepage Update** (`docs/index.html`)
-   - Markt overzicht met alle aandelen
-   - Top picks met gedetailleerde cards
-   - Statistieken en filters
-   - Volledig responsive
+1. **Homepage** met:
+   - Markt overzicht (75+ aandelen)
+   - Top picks met analyse
+   - Stats en filters
+   - Zoekfunctie
 
-2. **Data Snapshot** (`data_snapshots/snap_YYYY-MM-DD.json`)
-   - Ruwe data voor alle aandelen
-   - Handig voor eigen analyse
+2. **Data exports**:
+   - Ruwe data (JSON)
+   - Zoek index
+   - Historische snapshots
 
-3. **Zoek Index** (`docs/search-index.json`)
-   - Index voor zoekfunctie
-   - Snel vinden van aandelen
+3. **Volledig responsive**:
+   - Werkt op mobiel
+   - Tablet optimalisatie
+   - Desktop ervaring
 
 ---
 
 ## 🎯 Next Steps
 
-1. ✅ API Key aanvragen bij DashScope
-2. ✅ Lokaal testen met `python stock_analyzer.py`
-3. ✅ GitHub Pages instellen
-4. ✅ DASHSCOPE_API_KEY secret toevoegen
-5. ✅ Workflow handmatig triggeren om te testen
-6. ✅ Genieten van je dagelijkse marktanalyse!
+1. ✅ Clonen: `git clone ...`
+2. ✅ Installeren: `pip install -r requirements.txt`
+3. ✅ Testen: `python stock_analyzer.py`
+4. ✅ GitHub Pages aan (optioneel)
+5. ✅ Genieten maar! 🤠
 
 ---
 
-## 🏆 Features Roadmap
+## 🏆 Roadmap
 
-- [ ] Real-time prijs updates
+- [ ] Meer RSS feeds toevoegen
 - [ ] Portfolio tracking
-- [ ] Price alerts via email
+- [ ] Price alerts (email)
 - [ ] Backtesting module
-- [ ] Meerdere taalondersteuning
-- [ ] API endpoint voor externe toegang
-
----
-
-## 📞 Support
-
-Voor vragen of issues:
-- Check de [GitHub Issues](https://github.com/jouw-username/stockker/issues)
-- Lees de troubleshooting sectie hierboven
+- [ ] Meerdere talen
 
 ---
 
@@ -311,12 +280,26 @@ Voor vragen of issues:
 
 "Beurs Cowboy" omdat:
 - Trading net het wilde westen kan zijn
-- Je soms een sheriff nodig hebt (onze AI)
+- Je soms een sheriff nodig hebt
 - Het leuk klinkt
 - Yeehaw! 🤠
 
 ---
 
+## 💰 Kosten Overzicht
+
+| Dienst | Kosten |
+|--------|--------|
+| Python | €0,00 |
+| yfinance | €0,00 |
+| GitHub Pages | €0,00 |
+| GitHub Actions | €0,00 |
+| **TOTAAL** | **€0,00** |
+
+Geen credit card nodig. Geen "free trial" die na 30 dagen €50 kost. Gewoon gratis.
+
+---
+
 *Beurs Cowboy - Dagelijkse beursanalyse, vers van de pers.*
 
-*Data: Yahoo Finance | Sentiment: Qwen LLM | Hosting: GitHub Pages | Wijsheid: Het Wilde Westen*
+*Data: Yahoo Finance | Nieuws: RSS Feeds | Hosting: GitHub Pages | Wijsheid: Het Wilde Westen*

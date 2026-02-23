@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-Financial Market Analysis Platform
-Generates professional financial analysis content for web publication.
+Beurs Cowboy - Free Stock Analysis Platform
+
+Volledig gratis zonder API keys:
+- Yahoo Finance voor data en nieuws (gratis)
+- Keyword-based sentiment analyse (geen LLM nodig)
+- RSS feeds voor extra nieuws
+
+"Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff."
 """
 
 import yfinance as yf
@@ -12,7 +18,7 @@ import os
 import glob
 import json
 import re
-from qwen_agent.agents import Assistant
+import feedparser
 
 # ============= CONFIGURATION =============
 OUTPUT_DIR = "docs"
@@ -20,39 +26,90 @@ DATA_DIR = "data_snapshots"
 ARCHIVE_DIR = "docs/archive"
 
 TICKERS = [
-    # Mega Cap Tech
+    # Mega Cap Tech (6)
     'AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META',
-    # Semiconductors
+    # Semiconductors (6)
     'AMD', 'INTC', 'TSM', 'AVGO', 'QCOM', 'TXN',
-    # EV & Auto
+    # EV & Auto (5)
     'TSLA', 'RIVN', 'LCID', 'F', 'GM',
-    # Tech / Software
+    # Tech / Software (6)
     'ORCL', 'CRM', 'ADBE', 'NOW', 'INTU', 'PLTR',
-    # Social / Media
+    # Social / Media (5)
     'NFLX', 'DIS', 'CMCSA', 'PARA', 'WBD',
-    # Finance
+    # Finance - Banks (6)
     'JPM', 'BAC', 'GS', 'MS', 'WFC', 'C',
-    # Crypto Related
-    'COIN', 'MARA', 'RIOT', 'CLSK', 'HUT',
-    # Payments
+    # Finance - Payments (5)
     'V', 'MA', 'PYPL', 'SQ', 'AFRM',
-    # Retail / Consumer
+    # Finance - Crypto (5)
+    'COIN', 'MARA', 'RIOT', 'CLSK', 'HUT',
+    # Retail (6)
     'WMT', 'TGT', 'COST', 'HD', 'NKE', 'SBUX',
-    # Healthcare / Biotech
+    # Healthcare - Big Pharma (6)
     'JNJ', 'UNH', 'PFE', 'MRNA', 'REGN', 'GILD',
-    # Energy
+    # Energy (5)
     'XOM', 'CVX', 'COP', 'SLB', 'OXY',
-    # Industrials
+    # Industrials (5)
     'CAT', 'BA', 'GE', 'HON', 'UPS',
-    # European
+    # European (5)
     'ASML.AS', 'SAP', 'NESN.SW', 'NOVN.SW', 'AZN',
-    # Volatile / Growth
-    'SNOW', 'NET', 'DDOG', 'ZS', 'CRWD', 'MDB'
+    # Cloud / Cybersecurity (6)
+    'SNOW', 'NET', 'DDOG', 'ZS', 'CRWD', 'MDB',
+    # Biotech (6)
+    'BIIB', 'VRTX', 'ALNY', 'BMRN', 'INCY', 'TECH',
+    # Real Estate (5)
+    'AMT', 'PLD', 'CCI', 'EQIX', 'SPG',
+    # Telecom (4)
+    'T', 'VZ', 'TMUS', 'CHTR',
+    # Consumer Discretionary (6)
+    'MCD', 'NKE', 'LULU', 'DECK', 'CROX', 'SKX',
+    # Airlines (4)
+    'DAL', 'UAL', 'AAL', 'LUV',
+    # Cruise Lines (3)
+    'CCL', 'RCL', 'NCLH',
+    # Gaming (4)
+    'DKNG', 'PENN', 'MGM', 'WYNN',
+    # Cannabis (4)
+    'TLRY', 'SNDL', 'CGC', 'ACB',
+    # China Tech (5)
+    'BABA', 'JD', 'PDD', 'BIDU', 'NIO',
+    # Small Cap Growth (6)
+    'UPST', 'SOFI', 'HOOD', 'RBLX', 'U', 'PATH',
+    # Dividend Kings (5)
+    'KO', 'PEP', 'PG', 'MMM', 'JNJ',
+    # Utilities (4)
+    'NEE', 'DUK', 'SO', 'D',
+    # Materials (4)
+    'LIN', 'APD', 'ECL', 'SHW',
+    # Defense (4)
+    'LMT', 'RTX', 'NOC', 'GD',
 ]
 
-llm_cfg = {
-    'model': 'qwen-max-latest',
-    'model_type': 'qwen_dashscope',
+# ============= FREE SENTIMENT ANALYSIS =============
+# Keyword-based sentiment (geen API key nodig!)
+
+POSITIVE_KEYWORDS = [
+    'stijgt', 'stijging', 'winst', 'groei', 'record', 'bullish', 'koop',
+    'beat', 'outperforms', 'upgrade', 'positive', 'strong', 'growth',
+    'surge', 'rally', 'gain', 'profit', 'success', 'breakthrough',
+    'optimistic', 'bullish', 'outlook', 'exceeds', 'expectations',
+    'koopadvies', 'verwacht', 'positief', 'hoog', 'beter', 'goed',
+    'nieuwe', 'lanceert', 'partnership', 'deal', 'contract', 'wint'
+]
+
+NEGATIVE_KEYWORDS = [
+    'daalt', 'daling', 'verlies', 'crash', 'bearish', 'verkoop',
+    'miss', 'underperforms', 'downgrade', 'negative', 'weak', 'decline',
+    'drop', 'fall', 'loss', 'failure', 'lawsuit', 'investigation',
+    'pessimistic', 'bearish', 'warning', 'below', 'expectations',
+    'verkoopadvies', 'risico', 'negatief', 'laag', 'slechter', 'probleem',
+    'rechtszaak', 'onderzoek', 'boete', 'terugroep', 'storing', 'fout'
+]
+
+# RSS Feeds (gratis)
+RSS_FEEDS = {
+    'marketwatch': 'https://feeds.marketwatch.com/marketwatch/topstories/',
+    'reuters_business': 'https://www.reutersagency.com/feed/',
+    'yahoo_finance': 'https://finance.yahoo.com/news/rssindex',
 }
 
 # ============= TECHNICAL INDICATORS =============
@@ -90,9 +147,34 @@ def get_volatility_rank(hist, period=252):
     vol_rank = (daily_returns.rolling(20).std() < current_vol).sum() / (period - 20) * 100
     return vol_rank
 
-# ============= SENTIMENT ANALYSIS =============
+# ============= FREE SENTIMENT ANALYSIS =============
+# Keyword-based sentiment (geen API key nodig!)
 
-def get_qwen_sentiment(ticker, headlines):
+def analyze_sentiment(text):
+    """
+    Eenvoudige keyword-based sentiment analyse.
+    Geen API key nodig!
+    """
+    if not text:
+        return 0.0
+    
+    text_lower = text.lower()
+    
+    positive_count = sum(1 for keyword in POSITIVE_KEYWORDS if keyword.lower() in text_lower)
+    negative_count = sum(1 for keyword in NEGATIVE_KEYWORDS if keyword.lower() in text_lower)
+    
+    total = positive_count + negative_count
+    if total == 0:
+        return 0.0
+    
+    # Score tussen -1.0 en 1.0
+    score = (positive_count - negative_count) / total
+    return round(score, 2)
+
+def get_sentiment(ticker, headlines):
+    """
+    Analyseer sentiment van headlines zonder API.
+    """
     if not headlines:
         return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
     
@@ -100,52 +182,72 @@ def get_qwen_sentiment(ticker, headlines):
     if not valid_headlines:
         return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
     
-    text = "\n".join(valid_headlines)
-    prompt = f"""You are a professional financial analyst. Analyze these headlines for {ticker}.
-
-Return a JSON object with:
-1. "score": float between -1.0 (zeer negatief) and 1.0 (zeer positief)
-2. "summary": one professional sentence in Dutch explaining the sentiment
-3. "catalyst": what could move the stock (in Dutch)
-
-Headlines:
-{text}
-
-Return ONLY valid JSON."""
+    # Analyseer elke headline
+    scores = []
+    summaries = []
     
-    try:
-        bot = Assistant(llm=llm_cfg)
-        messages = [{'role': 'user', 'content': prompt}]
-        response = ""
-        for resp in bot.run(messages=messages):
-            if resp and isinstance(resp, list):
-                for item in resp:
-                    if isinstance(item, dict) and 'content' in item:
-                        response = item['content']
-                        break
+    for headline in valid_headlines:
+        score = analyze_sentiment(headline)
+        scores.append(score)
         
-        if not response:
-            return {"score": 0.0, "summary": "Geen analyse", "catalyst": "Geen"}
-        
-        response = response.strip()
-        if response.startswith('```json'):
-            response = response[7:]
-        if response.endswith('```'):
-            response = response[:-3]
-        response = response.strip()
-        
-        json_match = re.search(r'\{.*\}', response, re.DOTALL)
-        if json_match:
-            result = json.loads(json_match.group())
-            return {
-                "score": float(result.get('score', 0)),
-                "summary": result.get('summary', 'Neutraal'),
-                "catalyst": result.get('catalyst', 'Geen')
-            }
-        return {"score": 0.0, "summary": "Neutraal", "catalyst": "Geen"}
-    except Exception as e:
-        print(f"Sentiment error for {ticker}: {e}")
-        return {"score": 0.0, "summary": "Fout", "catalyst": "Onbekend"}
+        # Bepaal sentiment label
+        if score > 0.3:
+            summaries.append("Positief")
+        elif score < -0.3:
+            summaries.append("Negatief")
+        else:
+            summaries.append("Neutraal")
+    
+    # Gemiddelde score
+    avg_score = sum(scores) / len(scores) if scores else 0.0
+    
+    # Samenvatting
+    if avg_score > 0.3:
+        summary = f"Overwegend positief nieuws ({len([s for s in scores if s > 0])}/{len(scores)} positief)"
+    elif avg_score < -0.3:
+        summary = f"Overwegend negatief nieuws ({len([s for s in scores if s < 0])}/{len(scores)} negatief)"
+    else:
+        summary = "Gemengd nieuws, geen duidelijke trend"
+    
+    # Catalyst bepalen
+    all_text = " ".join(valid_headlines).lower()
+    catalyst = "Geen specifieke catalyst"
+    
+    if any(k in all_text for k in ['earnings', 'kwartaal', 'resultaat']):
+        catalyst = "Komende kwartaalcijfers"
+    elif any(k in all_text for k in ['product', 'lanceert', 'nieuwe']):
+        catalyst = "Nieuwe productaankondiging"
+    elif any(k in all_text for k in ['deal', 'contract', 'partnership']):
+        catalyst = "Zakelijke ontwikkeling"
+    elif any(k in all_text for k in ['upgrade', 'downgrade', 'advies']):
+        catalyst = "Analisten advies wijziging"
+    
+    return {
+        "score": round(avg_score, 2),
+        "summary": summary,
+        "catalyst": catalyst
+    }
+
+def fetch_rss_news():
+    """
+    Haal nieuws op van gratis RSS feeds.
+    """
+    all_news = []
+    
+    for source, url in RSS_FEEDS.items():
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries[:10]:
+                all_news.append({
+                    'source': source,
+                    'title': entry.title,
+                    'link': entry.link,
+                    'published': entry.get('published', '')
+                })
+        except Exception as e:
+            pass  # Negeer fouten, we hebben genoeg nieuws van Yahoo
+    
+    return all_news
 
 # ============= SCORING =============
 
@@ -275,7 +377,7 @@ def analyze():
             low_52w = hist['Low'].min()
             
             news = t.news
-            sentiment = get_qwen_sentiment(ticker, [n.get('title') for n in news])
+            sentiment = get_sentiment(ticker, [n.get('title') for n in news])
             
             setup_score, setup_reasons = calculate_setup_score(
                 rsi, macd_val, macd_signal, macd_hist,
@@ -366,7 +468,33 @@ def get_company_name(ticker):
         'ASML.AS': 'ASML Holding', 'SAP': 'SAP SE', 'NESN.SW': 'Nestle SA',
         'NOVN.SW': 'Novartis AG', 'AZN': 'AstraZeneca',
         'SNOW': 'Snowflake Inc', 'NET': 'Cloudflare Inc', 'DDOG': 'Datadog Inc',
-        'ZS': 'Zscaler Inc', 'CRWD': 'CrowdStrike Holdings', 'MDB': 'MongoDB Inc'
+        'ZS': 'Zscaler Inc', 'CRWD': 'CrowdStrike Holdings', 'MDB': 'MongoDB Inc',
+        'BIIB': 'Biogen Inc', 'VRTX': 'Vertex Pharma', 'ALNY': 'Alnylam Pharma',
+        'BMRN': 'BioMarin Pharma', 'INCY': 'Incyte Corp', 'TECH': 'Bio-Techne',
+        'AMT': 'American Tower', 'PLD': 'Prologis Inc', 'CCI': 'Crown Castle',
+        'EQIX': 'Equinix Inc', 'SPG': 'Simon Property',
+        'T': 'AT&T Inc', 'VZ': 'Verizon Comm', 'TMUS': 'T-Mobile US', 'CHTR': 'Charter Comm',
+        'MCD': "McDonald's Corp", 'LULU': 'Lululemon Athletica', 'DECK': 'Deckers Outdoor',
+        'CROX': 'Crocs Inc', 'SKX': 'Skechers USA',
+        'DAL': 'Delta Air Lines', 'UAL': 'United Airlines', 'AAL': 'American Airlines',
+        'LUV': 'Southwest Airlines',
+        'CCL': 'Carnival Corp', 'RCL': 'Royal Caribbean', 'NCLH': 'Norwegian Cruise',
+        'DKNG': 'DraftKings Inc', 'PENN': 'Penn Entertainment', 'MGM': 'MGM Resorts',
+        'WYNN': 'Wynn Resorts',
+        'TLRY': 'Tilray Brands', 'SNDL': 'SNDL Inc', 'CGC': 'Canopy Growth',
+        'ACB': 'Aurora Cannabis',
+        'BABA': 'Alibaba Group', 'JD': 'JD.com Inc', 'PDD': 'Pinduoduo Inc',
+        'BIDU': 'Baidu Inc', 'NIO': 'NIO Inc',
+        'UPST': 'Upstart Holdings', 'SOFI': 'SoFi Technologies', 'HOOD': 'Robinhood Markets',
+        'RBLX': 'Roblox Corp', 'U': 'Unity Software', 'PATH': 'UiPath Inc',
+        'KO': 'Coca-Cola Co', 'PEP': 'PepsiCo Inc', 'PG': 'Procter & Gamble',
+        'MMM': '3M Company',
+        'NEE': 'NextEra Energy', 'DUK': 'Duke Energy', 'SO': 'Southern Company',
+        'D': 'Dominion Energy',
+        'LIN': 'Linde PLC', 'APD': 'Air Products & Chem', 'ECL': 'Ecolab Inc',
+        'SHW': 'Sherwin-Williams',
+        'LMT': 'Lockheed Martin', 'RTX': 'RTX Corp', 'NOC': 'Northrop Grumman',
+        'GD': 'General Dynamics'
     }
     return names.get(ticker, ticker)
 
@@ -399,7 +527,34 @@ def get_sector(ticker):
         'ASML.AS': 'Technologie', 'SAP': 'Technologie', 'NESN.SW': 'Consument',
         'NOVN.SW': 'Healthcare', 'AZN': 'Healthcare',
         'SNOW': 'Technologie', 'NET': 'Technologie', 'DDOG': 'Technologie',
-        'ZS': 'Technologie', 'CRWD': 'Technologie', 'MDB': 'Technologie'
+        'ZS': 'Technologie', 'CRWD': 'Technologie', 'MDB': 'Technologie',
+        'BIIB': 'Healthcare', 'VRTX': 'Healthcare', 'ALNY': 'Healthcare',
+        'BMRN': 'Healthcare', 'INCY': 'Healthcare', 'TECH': 'Healthcare',
+        'AMT': 'Vastgoed', 'PLD': 'Vastgoed', 'CCI': 'Vastgoed',
+        'EQIX': 'Vastgoed', 'SPG': 'Vastgoed',
+        'T': 'Communicatie', 'VZ': 'Communicatie', 'TMUS': 'Communicatie',
+        'CHTR': 'Communicatie',
+        'MCD': 'Consument', 'LULU': 'Consument', 'DECK': 'Consument',
+        'CROX': 'Consument', 'SKX': 'Consument',
+        'DAL': 'Transport', 'UAL': 'Transport', 'AAL': 'Transport',
+        'LUV': 'Transport',
+        'CCL': 'Consument', 'RCL': 'Consument', 'NCLH': 'Consument',
+        'DKNG': 'Consument', 'PENN': 'Consument', 'MGM': 'Consument',
+        'WYNN': 'Consument',
+        'TLRY': 'Healthcare', 'SNDL': 'Healthcare', 'CGC': 'Healthcare',
+        'ACB': 'Healthcare',
+        'BABA': 'Consument', 'JD': 'Consument', 'PDD': 'Consument',
+        'BIDU': 'Technologie', 'NIO': 'Automotive',
+        'UPST': 'Financieel', 'SOFI': 'Financieel', 'HOOD': 'Financieel',
+        'RBLX': 'Technologie', 'U': 'Technologie', 'PATH': 'Technologie',
+        'KO': 'Consument', 'PEP': 'Consument', 'PG': 'Consument',
+        'MMM': 'Industrieel',
+        'NEE': 'Utilities', 'DUK': 'Utilities', 'SO': 'Utilities',
+        'D': 'Utilities',
+        'LIN': 'Materialen', 'APD': 'Materialen', 'ECL': 'Materialen',
+        'SHW': 'Materialen',
+        'LMT': 'Defensie', 'RTX': 'Defensie', 'NOC': 'Defensie',
+        'GD': 'Defensie'
     }
     return sectors.get(ticker, 'Overig')
 
