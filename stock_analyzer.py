@@ -4,7 +4,7 @@ Beurs Cowboy - Free Stock Analysis Platform
 
 Volledig gratis zonder API keys:
 - Yahoo Finance voor data en nieuws (gratis)
-- Keyword-based sentiment analyse (geen LLM nodig)
+- LLM sentiment analyse met Qwen (gratis tier)
 - RSS feeds voor extra nieuws
 
 "Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff."
@@ -19,12 +19,143 @@ import glob
 import json
 import re
 import feedparser
+from qwen_agent.agents import Assistant
 
 # ============= CONFIGURATION =============
 OUTPUT_DIR = "docs"
 DATA_DIR = "data_snapshots"
 ARCHIVE_DIR = "docs/archive"
 
+# ============= LLM SENTIMENT ANALYSIS =============
+# Qwen Agent voor sentiment analyse (gratis via Dashscope)
+
+def get_llm_sentiment(ticker, headlines):
+    """
+    Analyseer sentiment van headlines met Qwen LLM.
+    """
+    if not headlines:
+        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
+
+    valid_headlines = [h for h in headlines[:5] if h is not None]
+    if not valid_headlines:
+        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
+
+    # Bereid de headlines voor
+    headlines_text = "\n".join(f"- {h}" for h in valid_headlines)
+    
+    # Prompt voor sentiment analyse
+    prompt = f"""Je bent een financiële sentiment analist. Analyseer het volgende nieuws over {ticker}:
+
+{headlines_text}
+
+Geef je antwoord in het Nederlands als JSON in dit formaat:
+{{
+    "score": <getal tussen -1.0 en 1.0, waar -1 zeer negatief en 1 zeer positief>,
+    "summary": "<korte samenvatting in 1 zin>",
+    "catalyst": "<belangrijkste catalyst of 'Geen'>"
+}}
+
+Score richtlijnen:
+- Zeer negatief (-1.0 tot -0.6): slechte cijfers, ontslagen, schandalen
+- Negatief (-0.6 tot -0.3): tegenvallers, waarschuwingen
+- Neutraal (-0.3 tot 0.3): gemengd, geen duidelijke trend
+- Positief (0.3 tot 0.6): goede cijfers, groei, partnerships
+- Zeer positief (0.6 tot 1.0): records, doorbraken, upgrades"""
+
+    try:
+        # Initialiseer de assistant
+        llm_config = {'model': 'qwen-plus'}
+        bot = Assistant(llm=llm_config)
+        
+        # Genereer response
+        messages = [{'role': 'user', 'content': prompt}]
+        response = bot.run(messages=messages)
+        
+        # Parse de JSON response
+        response_text = response if isinstance(response, str) else str(response)
+        
+        # Extraheer JSON uit de response
+        json_match = re.search(r'\{[^{}]*\}', response_text, re.DOTALL)
+        if json_match:
+            result = json.loads(json_match.group())
+            return {
+                "score": round(float(result.get("score", 0.0)), 2),
+                "summary": result.get("summary", "Gemengd nieuws"),
+                "catalyst": result.get("catalyst", "Geen")
+            }
+        else:
+            return {"score": 0.0, "summary": "LLM analyse fout", "catalyst": "Geen"}
+            
+    except Exception as e:
+        # Fallback naar keyword-based bij fout
+        print(f"  LLM fout voor {ticker}, fallback naar keyword: {e}")
+        return get_keyword_sentiment_fallback(ticker, headlines)
+
+def get_keyword_sentiment_fallback(ticker, headlines):
+    """
+    Fallback: eenvoudige keyword-based sentiment analyse.
+    """
+    POSITIVE_KEYWORDS = [
+        'stijgt', 'stijging', 'winst', 'groei', 'record', 'bullish', 'koop',
+        'beat', 'outperforms', 'upgrade', 'positive', 'strong', 'growth',
+        'surge', 'rally', 'gain', 'profit', 'success', 'breakthrough',
+        'optimistic', 'bullish', 'outlook', 'exceeds', 'expectations',
+        'koopadvies', 'verwacht', 'positief', 'hoog', 'beter', 'goed',
+        'nieuwe', 'lanceert', 'partnership', 'deal', 'contract', 'wint'
+    ]
+
+    NEGATIVE_KEYWORDS = [
+        'daalt', 'daling', 'verlies', 'crash', 'bearish', 'verkoop',
+        'miss', 'underperforms', 'downgrade', 'negative', 'weak', 'decline',
+        'drop', 'fall', 'loss', 'failure', 'lawsuit', 'investigation',
+        'pessimistic', 'bearish', 'warning', 'below', 'expectations',
+        'verkoopadvies', 'risico', 'negatief', 'laag', 'slechter', 'probleem',
+        'rechtszaak', 'onderzoek', 'boete', 'terugroep', 'storing', 'fout'
+    ]
+
+    if not headlines:
+        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
+
+    valid_headlines = [h for h in headlines[:5] if h is not None]
+    if not valid_headlines:
+        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
+
+    scores = []
+    for headline in valid_headlines:
+        text_lower = headline.lower()
+        positive_count = sum(1 for k in POSITIVE_KEYWORDS if k.lower() in text_lower)
+        negative_count = sum(1 for k in NEGATIVE_KEYWORDS if k.lower() in text_lower)
+        total = positive_count + negative_count
+        score = (positive_count - negative_count) / total if total > 0 else 0.0
+        scores.append(score)
+
+    avg_score = sum(scores) / len(scores) if scores else 0.0
+
+    if avg_score > 0.3:
+        summary = f"Overwegend positief nieuws"
+    elif avg_score < -0.3:
+        summary = f"Overwegend negatief nieuws"
+    else:
+        summary = "Gemengd nieuws, geen duidelijke trend"
+
+    all_text = " ".join(valid_headlines).lower()
+    catalyst = "Geen specifieke catalyst"
+    if any(k in all_text for k in ['earnings', 'kwartaal', 'resultaat']):
+        catalyst = "Komende kwartaalcijfers"
+    elif any(k in all_text for k in ['product', 'lanceert', 'nieuwe']):
+        catalyst = "Nieuwe productaankondiging"
+    elif any(k in all_text for k in ['deal', 'contract', 'partnership']):
+        catalyst = "Zakelijke ontwikkeling"
+    elif any(k in all_text for k in ['upgrade', 'downgrade', 'advies']):
+        catalyst = "Analisten advies wijziging"
+
+    return {
+        "score": round(avg_score, 2),
+        "summary": summary,
+        "catalyst": catalyst
+    }
+
+# ============= TICKERS =============
 TICKERS = [
     # Mega Cap Tech (6)
     'AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META',
@@ -173,60 +304,9 @@ def analyze_sentiment(text):
 
 def get_sentiment(ticker, headlines):
     """
-    Analyseer sentiment van headlines zonder API.
+    Wrapper voor LLM sentiment analyse met fallback.
     """
-    if not headlines:
-        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
-    
-    valid_headlines = [h for h in headlines[:5] if h is not None]
-    if not valid_headlines:
-        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
-    
-    # Analyseer elke headline
-    scores = []
-    summaries = []
-    
-    for headline in valid_headlines:
-        score = analyze_sentiment(headline)
-        scores.append(score)
-        
-        # Bepaal sentiment label
-        if score > 0.3:
-            summaries.append("Positief")
-        elif score < -0.3:
-            summaries.append("Negatief")
-        else:
-            summaries.append("Neutraal")
-    
-    # Gemiddelde score
-    avg_score = sum(scores) / len(scores) if scores else 0.0
-    
-    # Samenvatting
-    if avg_score > 0.3:
-        summary = f"Overwegend positief nieuws ({len([s for s in scores if s > 0])}/{len(scores)} positief)"
-    elif avg_score < -0.3:
-        summary = f"Overwegend negatief nieuws ({len([s for s in scores if s < 0])}/{len(scores)} negatief)"
-    else:
-        summary = "Gemengd nieuws, geen duidelijke trend"
-    
-    # Catalyst bepalen
-    all_text = " ".join(valid_headlines).lower()
-    catalyst = "Geen specifieke catalyst"
-    
-    if any(k in all_text for k in ['earnings', 'kwartaal', 'resultaat']):
-        catalyst = "Komende kwartaalcijfers"
-    elif any(k in all_text for k in ['product', 'lanceert', 'nieuwe']):
-        catalyst = "Nieuwe productaankondiging"
-    elif any(k in all_text for k in ['deal', 'contract', 'partnership']):
-        catalyst = "Zakelijke ontwikkeling"
-    elif any(k in all_text for k in ['upgrade', 'downgrade', 'advies']):
-        catalyst = "Analisten advies wijziging"
-    
-    return {
-        "score": round(avg_score, 2),
-        "summary": summary,
-        "catalyst": catalyst
-    }
+    return get_llm_sentiment(ticker, headlines)
 
 def fetch_rss_news():
     """

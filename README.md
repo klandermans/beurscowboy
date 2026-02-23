@@ -45,22 +45,50 @@ Beurs Cowboy is een **100% gratis** geautomatiseerd platform dat dagelijks markt
 │     - Prijs, volume, RSI, MACD, Moving Averages                 │
 │     - 52-week high/low, ATR (volatiliteit)                      │
 │                    ↓                                            │
-│  4. Berekent technische setups                                  │
+│  4. LLM Sentiment Analyse (Qwen)                                │
+│     - Analyseert nieuws headlines per aandeel                   │
+│     - Bepaalt sentiment score (-1.0 tot 1.0)                    │
+│     - Identificeert catalysten                                  │
+│     - Fallback naar keyword analyse bij fout                    │
+│                    ↓                                            │
+│  5. Berekent technische setups                                  │
 │     - Trend analyse (bullish/bearish)                           │
 │     - Momentum signals                                          │
 │     - Potentiële upside                                         │
 │                    ↓                                            │
-│  5. Genereert HTML pagina's                                     │
+│  6. Genereert HTML pagina's                                     │
 │     - index.html (markt overzicht)                              │
 │     - analysis.html (gedetailleerde analyse)                    │
 │     - watchlist.html (aandelen om te volgen)                    │
 │     - archive.html (historie)                                   │
 │                    ↓                                            │
-│  6. Commit & push naar docs/ folder                             │
+│  7. Commit & push naar docs/ folder                             │
 │                    ↓                                            │
-│  7. GitHub Pages publiceert site automatisch                    │
+│  8. GitHub Pages publiceert site automatisch                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+### LLM Sentiment Analyse
+
+Het script gebruikt **Qwen** (via Dashscope) voor sentiment analyse:
+
+| Feature | Beschrijving |
+|---------|--------------|
+| **Model** | Qwen-plus (gratis tier) |
+| **Input** | Tot 5 nieuws headlines per aandeel |
+| **Output** | Score (-1.0 tot 1.0), summary, catalyst |
+| **Fallback** | Keyword-based analyse bij API fout |
+
+**API Key Setup (Optioneel):**
+- Zonder API key: gebruikt keyword-based sentiment (werkt prima!)
+- Met API key: gebruikt LLM voor slimmere analyse
+- Gratis tier: 100 requests/dag (voldoet voor 138 aandelen)
+
+**Dashscope API Key aanvragen:**
+1. Ga naar: https://dashscope.console.aliyun.com/
+2. Maak account aan (gratis)
+3. Maak API key aan
+4. Voeg toe aan GitHub Secrets als `DASHSCOPE_API_KEY`
 
 ### Technische Analyse
 
