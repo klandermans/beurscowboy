@@ -430,13 +430,14 @@ def analyze():
             print(f"❌ {e}")
 
     results.sort(key=lambda x: x['setup_score'], reverse=True)
-    
+
     print(f"\n📝 Generating site...")
     generate_main_site(results, today)
     generate_article(results, today)
+    generate_watchlist(results, today)
     save_snapshot(snapshot_data, today_str)
     generate_search_data(results, today_str)
-    
+
     print(f"\n✅ Site generated in {OUTPUT_DIR}/")
 
 def get_company_name(ticker):
@@ -992,6 +993,193 @@ def generate_search_data(results, date_str):
     }
     with open(os.path.join(OUTPUT_DIR, "search-index.json"), "w") as f:
         json.dump(search_index, f, indent=2)
+
+def generate_watchlist(results, today):
+    """Generate watchlist.html - stocks with potential but not yet buy signals"""
+    
+    date_str = today.strftime("%Y-%m-%d")
+    date_display = today.strftime("%d %B %Y")
+    
+    # Watchlist: stocks with setup_score >= 0 but signal is neutral or watch
+    # These are stocks that have potential but need more confirmation
+    watchlist_stocks = [
+        r for r in results 
+        if r['setup_score'] >= 0 and r['signal'] in ['Neutraal', 'Voorzichtig']
+        and r['potential_upside'] >= 2.0
+    ][:15]  # Top 15
+    
+    watchlist_rows = ""
+    for r in watchlist_stocks:
+        change_class = "positive" if r['change_pct'] >= 0 else "negative"
+        change_sign = "+" if r['change_pct'] >= 0 else ""
+        watchlist_rows += f"""
+        <tr class="stock-row" data-ticker="{r['ticker']}" data-sector="{r['sector']}">
+            <td class="ticker"><strong>{r['ticker']}</strong><br><small>{r['name']}</small></td>
+            <td class="sector">{r['sector']}</td>
+            <td class="price">€{r['price']:.2f}</td>
+            <td class="change {change_class}">{change_sign}{r['change_pct']:.2f}%</td>
+            <td class="volume">{r['volume']:,}</td>
+            <td class="rsi">{r['rsi']:.1f}</td>
+            <td class="setup-type">{r['setup_type']}</td>
+            <td class="upside">+{r['potential_upside']:.1f}%</td>
+        </tr>"""
+    
+    # If no stocks match criteria, show message
+    if not watchlist_stocks:
+        watchlist_rows = """
+        <tr>
+            <td colspan="8" class="no-results">
+                <p>Geen aandelen op de watchlist vandaag. Alle aandelen hebben duidelijke signals (koop/verkoop).</p>
+            </td>
+        </tr>"""
+    
+    html = f"""<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aandelen om in de gaten te houden - potentiële trading setups">
+    <meta name="theme-color" content="#059669">
+    <title>Watchlist | Beurs Cowboy | {date_display}</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" class="logo-link">
+                    <span class="logo-icon">🤠</span>
+                    <span class="logo-text">Beurs<span class="highlight">Cowboy</span></span>
+                </a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="main-nav" id="mainNav">
+                <a href="index.html">Markten</a>
+                <a href="analysis.html">Analyse</a>
+                <a href="watchlist.html" class="active">Watchlist</a>
+                <a href="archive.html">Archief</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <button class="search-toggle" id="searchToggle" aria-label="Search">
+                    🔍
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="searchBar">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Zoek aandelen, sectoren, signals..." aria-label="Search">
+            <button class="search-close" id="searchClose">✕</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="content-section">
+            <div class="section-header">
+                <h1>Watchlist</h1>
+                <p class="section-subtitle">Aandelen met interessante setups - {date_display}</p>
+            </div>
+
+            <div class="watchlist-info">
+                <p>De watchlist toont aandelen met interessante setups die nog niet aan alle criteria voor een "Koop" signaal voldoen, maar wel potentieel hebben.</p>
+            </div>
+            
+            <!-- Watchlist Stats -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <span class="stat-icon">👀</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{len(watchlist_stocks)}</span>
+                        <span class="stat-label">Op Watchlist</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📈</span>
+                    <div class="stat-content">
+                        <span class="stat-value">+{sum(r['potential_upside'] for r in watchlist_stocks)/len(watchlist_stocks) if watchlist_stocks else 0:.1f}%</span>
+                        <span class="stat-label">Gem. Potentieel</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Watchlist Table -->
+            <div class="market-table-section">
+                <h2 class="section-title">Aandelen om te volgen</h2>
+                <div class="table-container">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Aandeel</th>
+                                <th>Sector</th>
+                                <th>Prijs</th>
+                                <th>Verandering</th>
+                                <th>Volume</th>
+                                <th>RSI</th>
+                                <th>Setup Type</th>
+                                <th>Potentieel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {watchlist_rows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Watchlist explanation -->
+            <div class="watchlist-explanation" style="margin-top: 2rem;">
+                <h3>Waarom deze aandelen volgen?</h3>
+                <p>Deze aandelen tonen interessante technische patronen maar hebben nog geen duidelijke "Koop" of "Verkoop" signalen. Ze kunnen potentie hebben als:</p>
+                <ul>
+                    <li><strong>RSI tussen 40-60:</strong> Neutrale zone, kan beide kanten op bewegen</li>
+                    <li><strong>Nabij moving averages:</strong> Test van steun/weerstand niveaus</li>
+                    <li><strong>Gemengde MACD signalen:</strong> Momentum is niet eenduidig</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>🤠 Beurs Cowboy</h4>
+                    <p>Dagelijkse beursanalyse met een westelijk tintje. AI-powered, cowboy-goedgekeurd.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Disclaimer</h4>
+                    <p>Dit is geen financieel advies. Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Data Bronnen</h4>
+                    <p>Prijzen: Yahoo Finance<br>Sentiment: Qwen LLM<br>Wijsheid: Het Wilde Westen</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {today.year} Beurs Cowboy. Yeehaw! 🤠 Alle rechten voorbehouden.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/main.js"></script>
+</body>
+</html>"""
+    
+    with open(os.path.join(OUTPUT_DIR, "watchlist.html"), "w") as f:
+        f.write(html)
 
 if __name__ == "__main__":
     analyze()

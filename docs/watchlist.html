@@ -3,78 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watchlist | MarketInsights</title>
+    <meta name="description" content="Aandelen om in de gaten te houden - potentiële trading setups">
+    <meta name="theme-color" content="#059669">
+    <title>Watchlist | Beurs Cowboy | 23 February 2026</title>
     <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
+    <!-- Header -->
     <header class="site-header">
         <div class="header-container">
             <div class="logo">
                 <a href="index.html" class="logo-link">
-                    <span class="logo-icon">📈</span>
-                    <span class="logo-text">Market<span class="highlight">Insights</span></span>
+                    <span class="logo-icon">🤠</span>
+                    <span class="logo-text">Beurs<span class="highlight">Cowboy</span></span>
                 </a>
             </div>
-            <nav class="main-nav">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="main-nav" id="mainNav">
                 <a href="index.html">Markten</a>
                 <a href="analysis.html">Analyse</a>
                 <a href="watchlist.html" class="active">Watchlist</a>
                 <a href="archive.html">Archief</a>
             </nav>
             <div class="header-actions">
-                <button class="theme-toggle" id="themeToggle">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
                     <span class="icon-sun">☀️</span>
                     <span class="icon-moon">🌙</span>
                 </button>
-                <button class="search-toggle" id="searchToggle">🔍</button>
+                <button class="search-toggle" id="searchToggle" aria-label="Search">
+                    🔍
+                </button>
             </div>
         </div>
     </header>
 
+    <!-- Search Bar -->
     <div class="search-bar" id="searchBar">
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Zoek aandelen, sectoren, signals...">
+            <input type="text" id="searchInput" placeholder="Zoek aandelen, sectoren, signals..." aria-label="Search">
             <button class="search-close" id="searchClose">✕</button>
         </div>
     </div>
 
+    <!-- Main Content -->
     <main class="main-content">
         <section class="content-section">
             <div class="section-header">
                 <h1>Watchlist</h1>
-                <p class="section-subtitle">Aandelen om in de gaten te houden</p>
+                <p class="section-subtitle">Aandelen met interessante setups - 23 February 2026</p>
             </div>
 
             <div class="watchlist-info">
-                <p>De watchlist toont aandelen met interessante setups die nog niet aan alle criteria voor een "Koop" signal voldoen, maar wel potentieel hebben.</p>
+                <p>De watchlist toont aandelen met interessante setups die nog niet aan alle criteria voor een "Koop" signaal voldoen, maar wel potentieel hebben.</p>
+            </div>
+            
+            <!-- Watchlist Stats -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <span class="stat-icon">👀</span>
+                    <div class="stat-content">
+                        <span class="stat-value">15</span>
+                        <span class="stat-label">Op Watchlist</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📈</span>
+                    <div class="stat-content">
+                        <span class="stat-value">+3.2%</span>
+                        <span class="stat-label">Gem. Potentieel</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="watchlist-grid" id="watchlist-grid">
-                <div class="watchlist-placeholder">
-                    <p class="text-center">Watchlist wordt dagelijks bijgewerkt. Bekijk de homepage voor de laatste signals.</p>
+            <!-- Watchlist Table -->
+            <div class="market-table-section">
+                <h2 class="section-title">Aandelen om te volgen</h2>
+                <div class="table-container">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Aandeel</th>
+                                <th>Sector</th>
+                                <th>Prijs</th>
+                                <th>Verandering</th>
+                                <th>Volume</th>
+                                <th>RSI</th>
+                                <th>Setup Type</th>
+                                <th>Potentieel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+        <tr class="stock-row" data-ticker="COP" data-sector="Energie">
+            <td class="ticker"><strong>COP</strong><br><small>ConocoPhillips</small></td>
+            <td class="sector">Energie</td>
+            <td class="price">€110.53</td>
+            <td class="change negative">-0.95%</td>
+            <td class="volume">6,822,800</td>
+            <td class="rsi">62.9</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.0%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="AZN" data-sector="Healthcare">
+            <td class="ticker"><strong>AZN</strong><br><small>AstraZeneca</small></td>
+            <td class="sector">Healthcare</td>
+            <td class="price">€204.20</td>
+            <td class="change negative">-2.12%</td>
+            <td class="volume">1,592,700</td>
+            <td class="rsi">69.6</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.1%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="WYNN" data-sector="Consument">
+            <td class="ticker"><strong>WYNN</strong><br><small>Wynn Resorts</small></td>
+            <td class="sector">Consument</td>
+            <td class="price">€114.87</td>
+            <td class="change negative">-0.42%</td>
+            <td class="volume">1,358,800</td>
+            <td class="rsi">61.4</td>
+            <td class="setup-type">Gemengd Signaal</td>
+            <td class="upside">+2.6%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="NEE" data-sector="Utilities">
+            <td class="ticker"><strong>NEE</strong><br><small>NextEra Energy</small></td>
+            <td class="sector">Utilities</td>
+            <td class="price">€92.18</td>
+            <td class="change positive">+0.59%</td>
+            <td class="volume">7,174,500</td>
+            <td class="rsi">65.2</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.6%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="SO" data-sector="Utilities">
+            <td class="ticker"><strong>SO</strong><br><small>Southern Company</small></td>
+            <td class="sector">Utilities</td>
+            <td class="price">€94.30</td>
+            <td class="change negative">-0.79%</td>
+            <td class="volume">10,713,300</td>
+            <td class="rsi">64.9</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.5%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="TSM" data-sector="Technologie">
+            <td class="ticker"><strong>TSM</strong><br><small>TSMC</small></td>
+            <td class="sector">Technologie</td>
+            <td class="price">€370.54</td>
+            <td class="change positive">+2.82%</td>
+            <td class="volume">8,994,200</td>
+            <td class="rsi">70.3</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+2.6%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="CAT" data-sector="Industrieel">
+            <td class="ticker"><strong>CAT</strong><br><small>Caterpillar Inc</small></td>
+            <td class="sector">Industrieel</td>
+            <td class="price">€759.74</td>
+            <td class="change negative">-0.10%</td>
+            <td class="volume">2,049,200</td>
+            <td class="rsi">72.2</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+4.0%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="NOC" data-sector="Defensie">
+            <td class="ticker"><strong>NOC</strong><br><small>Northrop Grumman</small></td>
+            <td class="sector">Defensie</td>
+            <td class="price">€723.56</td>
+            <td class="change negative">-1.81%</td>
+            <td class="volume">743,200</td>
+            <td class="rsi">59.4</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.0%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="NKE" data-sector="Consument">
+            <td class="ticker"><strong>NKE</strong><br><small>Nike Inc</small></td>
+            <td class="sector">Consument</td>
+            <td class="price">€65.40</td>
+            <td class="change negative">-0.32%</td>
+            <td class="volume">33,428,700</td>
+            <td class="rsi">60.9</td>
+            <td class="setup-type">Gemengd Signaal</td>
+            <td class="upside">+3.4%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="NKE" data-sector="Consument">
+            <td class="ticker"><strong>NKE</strong><br><small>Nike Inc</small></td>
+            <td class="sector">Consument</td>
+            <td class="price">€65.40</td>
+            <td class="change negative">-0.32%</td>
+            <td class="volume">33,428,700</td>
+            <td class="rsi">60.9</td>
+            <td class="setup-type">Gemengd Signaal</td>
+            <td class="upside">+3.4%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="CGC" data-sector="Healthcare">
+            <td class="ticker"><strong>CGC</strong><br><small>Canopy Growth</small></td>
+            <td class="sector">Healthcare</td>
+            <td class="price">€1.19</td>
+            <td class="change positive">+1.71%</td>
+            <td class="volume">13,958,300</td>
+            <td class="rsi">61.9</td>
+            <td class="setup-type">Gemengd Signaal</td>
+            <td class="upside">+3.8%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="AVGO" data-sector="Technologie">
+            <td class="ticker"><strong>AVGO</strong><br><small>Broadcom Inc</small></td>
+            <td class="sector">Technologie</td>
+            <td class="price">€332.65</td>
+            <td class="change negative">-0.40%</td>
+            <td class="volume">17,638,800</td>
+            <td class="rsi">50.7</td>
+            <td class="setup-type">MA Test</td>
+            <td class="upside">+2.6%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="F" data-sector="Automotive">
+            <td class="ticker"><strong>F</strong><br><small>Ford Motor</small></td>
+            <td class="sector">Automotive</td>
+            <td class="price">€14.01</td>
+            <td class="change positive">+1.67%</td>
+            <td class="volume">67,563,600</td>
+            <td class="rsi">57.2</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+2.4%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="NESN.SW" data-sector="Consument">
+            <td class="ticker"><strong>NESN.SW</strong><br><small>Nestle SA</small></td>
+            <td class="sector">Consument</td>
+            <td class="price">€80.91</td>
+            <td class="change negative">-0.64%</td>
+            <td class="volume">5,670,392</td>
+            <td class="rsi">71.9</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.2%</td>
+        </tr>
+        <tr class="stock-row" data-ticker="T" data-sector="Communicatie">
+            <td class="ticker"><strong>T</strong><br><small>AT&T Inc</small></td>
+            <td class="sector">Communicatie</td>
+            <td class="price">€27.98</td>
+            <td class="change positive">+0.36%</td>
+            <td class="volume">25,380,300</td>
+            <td class="rsi">72.1</td>
+            <td class="setup-type">Trend Volgt</td>
+            <td class="upside">+3.5%</td>
+        </tr>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+            
+            <!-- Watchlist explanation -->
+            <div class="watchlist-explanation" style="margin-top: 2rem;">
+                <h3>Waarom deze aandelen volgen?</h3>
+                <p>Deze aandelen tonen interessante technische patronen maar hebben nog geen duidelijke "Koop" of "Verkoop" signalen. Ze kunnen potentie hebben als:</p>
+                <ul>
+                    <li><strong>RSI tussen 40-60:</strong> Neutrale zone, kan beide kanten op bewegen</li>
+                    <li><strong>Nabij moving averages:</strong> Test van steun/weerstand niveaus</li>
+                    <li><strong>Gemengde MACD signalen:</strong> Momentum is niet eenduidig</li>
+                </ul>
             </div>
         </section>
     </main>
 
+    <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>MarketInsights</h4>
-                    <p>Dagelijkse marktanalyse powered by AI</p>
+                    <h4>🤠 Beurs Cowboy</h4>
+                    <p>Dagelijkse beursanalyse met een westelijk tintje. AI-powered, cowboy-goedgekeurd.</p>
                 </div>
                 <div class="footer-section">
                     <h4>Disclaimer</h4>
-                    <p>Dit is geen financieel advies. Trading brengt risico's met zich mee.</p>
+                    <p>Dit is geen financieel advies. Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff.</p>
                 </div>
                 <div class="footer-section">
                     <h4>Data Bronnen</h4>
-                    <p>Prijzen: Yahoo Finance<br>Sentiment: Qwen LLM</p>
+                    <p>Prijzen: Yahoo Finance<br>Sentiment: Qwen LLM<br>Wijsheid: Het Wilde Westen</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 MarketInsights. Alle rechten voorbehouden.</p>
+                <p>&copy; 2026 Beurs Cowboy. Yeehaw! 🤠 Alle rechten voorbehouden.</p>
             </div>
         </div>
     </footer>
