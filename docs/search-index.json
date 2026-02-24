@@ -1,12 +1,12 @@
 {
-  "date": "2026-02-23",
+  "date": "2026-02-24",
   "stocks": [
     {
-      "ticker": "MRNA",
-      "name": "Moderna Inc",
-      "sector": "Healthcare",
-      "signal": "Sterk Koop",
-      "signal_class": "buy-strong"
+      "ticker": "TSM",
+      "name": "TSMC",
+      "sector": "Technologie",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
     },
     {
       "ticker": "REGN",
@@ -23,11 +23,11 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "OXY",
-      "name": "Occidental Petroleum",
-      "sector": "Energie",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
+      "ticker": "CAT",
+      "name": "Caterpillar Inc",
+      "sector": "Industrieel",
+      "signal": "Koop",
+      "signal_class": "buy"
     },
     {
       "ticker": "AZN",
@@ -40,13 +40,13 @@
       "ticker": "BIIB",
       "name": "Biogen Inc",
       "sector": "Healthcare",
-      "signal": "Koop",
-      "signal_class": "buy"
+      "signal": "Neutraal",
+      "signal_class": "neutral"
     },
     {
-      "ticker": "CHTR",
-      "name": "Charter Comm",
-      "sector": "Communicatie",
+      "ticker": "CROX",
+      "name": "Crocs Inc",
+      "sector": "Consument",
       "signal": "Sterk Koop",
       "signal_class": "buy-strong"
     },
@@ -58,6 +58,27 @@
       "signal_class": "buy"
     },
     {
+      "ticker": "NOC",
+      "name": "Northrop Grumman",
+      "sector": "Defensie",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "NESN.SW",
+      "name": "Nestle SA",
+      "sector": "Consument",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "AMT",
+      "name": "American Tower",
+      "sector": "Vastgoed",
+      "signal": "Koop",
+      "signal_class": "buy"
+    },
+    {
       "ticker": "SPG",
       "name": "Simon Property",
       "sector": "Vastgoed",
@@ -65,29 +86,8 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "WYNN",
-      "name": "Wynn Resorts",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "NEE",
-      "name": "NextEra Energy",
-      "sector": "Utilities",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "DUK",
-      "name": "Duke Energy",
-      "sector": "Utilities",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "SO",
-      "name": "Southern Company",
+      "ticker": "D",
+      "name": "Dominion Energy",
       "sector": "Utilities",
       "signal": "Neutraal",
       "signal_class": "neutral"
@@ -100,13 +100,6 @@
       "signal_class": "buy-strong"
     },
     {
-      "ticker": "TSM",
-      "name": "TSMC",
-      "sector": "Technologie",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
       "ticker": "RIOT",
       "name": "Riot Platforms",
       "sector": "Financieel",
@@ -114,23 +107,30 @@
       "signal_class": "buy-strong"
     },
     {
-      "ticker": "TGT",
-      "name": "Target Corporation",
-      "sector": "Retail",
-      "signal": "Koop",
-      "signal_class": "buy"
+      "ticker": "MRNA",
+      "name": "Moderna Inc",
+      "sector": "Healthcare",
+      "signal": "Sterk Koop",
+      "signal_class": "buy-strong"
     },
     {
-      "ticker": "CAT",
-      "name": "Caterpillar Inc",
+      "ticker": "GE",
+      "name": "General Electric",
       "sector": "Industrieel",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "EQIX",
-      "name": "Equinix Inc",
-      "sector": "Vastgoed",
+      "ticker": "VRTX",
+      "name": "Vertex Pharma",
+      "sector": "Healthcare",
+      "signal": "Koop",
+      "signal_class": "buy"
+    },
+    {
+      "ticker": "BMRN",
+      "name": "BioMarin Pharma",
+      "sector": "Healthcare",
       "signal": "Koop",
       "signal_class": "buy"
     },
@@ -140,13 +140,6 @@
       "sector": "Consument",
       "signal": "Koop",
       "signal_class": "buy"
-    },
-    {
-      "ticker": "CROX",
-      "name": "Crocs Inc",
-      "sector": "Consument",
-      "signal": "Sterk Koop",
-      "signal_class": "buy-strong"
     },
     {
       "ticker": "NCLH",
@@ -163,60 +156,11 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "NOC",
-      "name": "Northrop Grumman",
-      "sector": "Defensie",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
       "ticker": "WBD",
       "name": "Warner Bros Discovery",
       "sector": "Communicatie",
       "signal": "Neutraal",
       "signal_class": "neutral"
-    },
-    {
-      "ticker": "NKE",
-      "name": "Nike Inc",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "NKE",
-      "name": "Nike Inc",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "UAL",
-      "name": "United Airlines",
-      "sector": "Transport",
-      "signal": "Sterk Koop",
-      "signal_class": "buy-strong"
-    },
-    {
-      "ticker": "MGM",
-      "name": "MGM Resorts",
-      "sector": "Consument",
-      "signal": "Sterk Koop",
-      "signal_class": "buy-strong"
-    },
-    {
-      "ticker": "CGC",
-      "name": "Canopy Growth",
-      "sector": "Healthcare",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "NIO",
-      "name": "NIO Inc",
-      "sector": "Automotive",
-      "signal": "Koop",
-      "signal_class": "buy"
     },
     {
       "ticker": "AVGO",
@@ -226,46 +170,18 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "RIVN",
-      "name": "Rivian Automotive",
-      "sector": "Automotive",
-      "signal": "Sterk Koop",
-      "signal_class": "buy-strong"
-    },
-    {
-      "ticker": "F",
-      "name": "Ford Motor",
-      "sector": "Automotive",
+      "ticker": "OXY",
+      "name": "Occidental Petroleum",
+      "sector": "Energie",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "GE",
-      "name": "General Electric",
-      "sector": "Industrieel",
+      "ticker": "ASML.AS",
+      "name": "ASML Holding",
+      "sector": "Technologie",
       "signal": "Neutraal",
       "signal_class": "neutral"
-    },
-    {
-      "ticker": "NESN.SW",
-      "name": "Nestle SA",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "BMRN",
-      "name": "BioMarin Pharma",
-      "sector": "Healthcare",
-      "signal": "Koop",
-      "signal_class": "buy"
-    },
-    {
-      "ticker": "AMT",
-      "name": "American Tower",
-      "sector": "Vastgoed",
-      "signal": "Koop",
-      "signal_class": "buy"
     },
     {
       "ticker": "PLD",
@@ -275,25 +191,25 @@
       "signal_class": "neutral"
     },
     {
+      "ticker": "CCI",
+      "name": "Crown Castle",
+      "sector": "Vastgoed",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "EQIX",
+      "name": "Equinix Inc",
+      "sector": "Vastgoed",
+      "signal": "Koop",
+      "signal_class": "buy"
+    },
+    {
       "ticker": "T",
       "name": "AT&T Inc",
       "sector": "Communicatie",
       "signal": "Neutraal",
       "signal_class": "neutral"
-    },
-    {
-      "ticker": "VZ",
-      "name": "Verizon Comm",
-      "sector": "Communicatie",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "TMUS",
-      "name": "T-Mobile US",
-      "sector": "Communicatie",
-      "signal": "Koop",
-      "signal_class": "buy"
     },
     {
       "ticker": "MCD",
@@ -306,6 +222,20 @@
       "ticker": "KO",
       "name": "Coca-Cola Co",
       "sector": "Consument",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "PG",
+      "name": "Procter & Gamble",
+      "sector": "Consument",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "SO",
+      "name": "Southern Company",
+      "sector": "Utilities",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
@@ -331,13 +261,6 @@
       "signal_class": "buy"
     },
     {
-      "ticker": "TSLA",
-      "name": "Tesla Inc",
-      "sector": "Automotive",
-      "signal": "Koop",
-      "signal_class": "buy"
-    },
-    {
       "ticker": "ORCL",
       "name": "Oracle Corporation",
       "sector": "Technologie",
@@ -352,18 +275,25 @@
       "signal_class": "buy"
     },
     {
-      "ticker": "MARA",
-      "name": "Marathon Digital",
+      "ticker": "PLTR",
+      "name": "Palantir Technologies",
+      "sector": "Technologie",
+      "signal": "Koop",
+      "signal_class": "buy"
+    },
+    {
+      "ticker": "PYPL",
+      "name": "PayPal Holdings",
       "sector": "Financieel",
       "signal": "Koop",
       "signal_class": "buy"
     },
     {
-      "ticker": "JNJ",
-      "name": "Johnson & Johnson",
-      "sector": "Healthcare",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
+      "ticker": "COIN",
+      "name": "Coinbase Global",
+      "sector": "Financieel",
+      "signal": "Koop",
+      "signal_class": "buy"
     },
     {
       "ticker": "NOVN.SW",
@@ -380,36 +310,22 @@
       "signal_class": "buy"
     },
     {
-      "ticker": "DDOG",
-      "name": "Datadog Inc",
-      "sector": "Technologie",
-      "signal": "Koop",
-      "signal_class": "buy"
-    },
-    {
-      "ticker": "CRWD",
-      "name": "CrowdStrike Holdings",
-      "sector": "Technologie",
-      "signal": "Koop",
-      "signal_class": "buy"
-    },
-    {
-      "ticker": "CCI",
-      "name": "Crown Castle",
-      "sector": "Vastgoed",
+      "ticker": "VZ",
+      "name": "Verizon Comm",
+      "sector": "Communicatie",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "LULU",
-      "name": "Lululemon Athletica",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
+      "ticker": "TMUS",
+      "name": "T-Mobile US",
+      "sector": "Communicatie",
+      "signal": "Koop",
+      "signal_class": "buy"
     },
     {
-      "ticker": "SNDL",
-      "name": "SNDL Inc",
+      "ticker": "CGC",
+      "name": "Canopy Growth",
       "sector": "Healthcare",
       "signal": "Koop",
       "signal_class": "buy"
@@ -422,30 +338,37 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "JNJ",
-      "name": "Johnson & Johnson",
-      "sector": "Healthcare",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
+      "ticker": "NIO",
+      "name": "NIO Inc",
+      "sector": "Automotive",
+      "signal": "Koop",
+      "signal_class": "buy"
     },
     {
-      "ticker": "D",
-      "name": "Dominion Energy",
+      "ticker": "HOOD",
+      "name": "Robinhood Markets",
+      "sector": "Financieel",
+      "signal": "Koop",
+      "signal_class": "buy"
+    },
+    {
+      "ticker": "NEE",
+      "name": "NextEra Energy",
       "sector": "Utilities",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "SBUX",
-      "name": "Starbucks Corporation",
-      "sector": "Consument",
-      "signal": "Koop",
-      "signal_class": "buy"
+      "ticker": "DUK",
+      "name": "Duke Energy",
+      "sector": "Utilities",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
     },
     {
-      "ticker": "GILD",
-      "name": "Gilead Sciences",
-      "sector": "Healthcare",
+      "ticker": "XOM",
+      "name": "Exxon Mobil",
+      "sector": "Energie",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
@@ -455,13 +378,6 @@
       "sector": "Energie",
       "signal": "Neutraal",
       "signal_class": "neutral"
-    },
-    {
-      "ticker": "LUV",
-      "name": "Southwest Airlines",
-      "sector": "Transport",
-      "signal": "Koop",
-      "signal_class": "buy"
     },
     {
       "ticker": "CRM",
@@ -474,34 +390,20 @@
       "ticker": "NFLX",
       "name": "Netflix Inc",
       "sector": "Communicatie",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "PYPL",
-      "name": "PayPal Holdings",
-      "sector": "Financieel",
       "signal": "Koop",
       "signal_class": "buy"
     },
     {
-      "ticker": "CMCSA",
-      "name": "Comcast Corp",
+      "ticker": "UPS",
+      "name": "United Parcel Service",
+      "sector": "Industrieel",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "CHTR",
+      "name": "Charter Comm",
       "sector": "Communicatie",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "COST",
-      "name": "Costco Wholesale",
-      "sector": "Retail",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "CVX",
-      "name": "Chevron Corporation",
-      "sector": "Energie",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
@@ -513,15 +415,15 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "GOOGL",
-      "name": "Alphabet Inc",
-      "sector": "Technologie",
+      "ticker": "APD",
+      "name": "Air Products & Chem",
+      "sector": "Materialen",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "AMD",
-      "name": "Advanced Micro Devices",
+      "ticker": "INTC",
+      "name": "Intel Corporation",
       "sector": "Technologie",
       "signal": "Neutraal",
       "signal_class": "neutral"
@@ -534,57 +436,57 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "ADBE",
-      "name": "Adobe Inc",
-      "sector": "Technologie",
+      "ticker": "RIVN",
+      "name": "Rivian Automotive",
+      "sector": "Automotive",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "PLTR",
-      "name": "Palantir Technologies",
-      "sector": "Technologie",
+      "ticker": "GM",
+      "name": "General Motors",
+      "sector": "Automotive",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "COIN",
-      "name": "Coinbase Global",
+      "ticker": "GS",
+      "name": "Goldman Sachs",
       "sector": "Financieel",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "XOM",
-      "name": "Exxon Mobil",
-      "sector": "Energie",
+      "ticker": "MARA",
+      "name": "Marathon Digital",
+      "sector": "Financieel",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "ASML.AS",
-      "name": "ASML Holding",
-      "sector": "Technologie",
+      "ticker": "WMT",
+      "name": "Walmart Inc",
+      "sector": "Retail",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "NET",
-      "name": "Cloudflare Inc",
-      "sector": "Technologie",
+      "ticker": "TGT",
+      "name": "Target Corporation",
+      "sector": "Retail",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "MDB",
-      "name": "MongoDB Inc",
-      "sector": "Technologie",
+      "ticker": "NKE",
+      "name": "Nike Inc",
+      "sector": "Consument",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "VRTX",
-      "name": "Vertex Pharma",
+      "ticker": "GILD",
+      "name": "Gilead Sciences",
       "sector": "Healthcare",
       "signal": "Neutraal",
       "signal_class": "neutral"
@@ -597,15 +499,29 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "TECH",
-      "name": "Bio-Techne",
-      "sector": "Healthcare",
+      "ticker": "NKE",
+      "name": "Nike Inc",
+      "sector": "Consument",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "CCL",
-      "name": "Carnival Corp",
+      "ticker": "LULU",
+      "name": "Lululemon Athletica",
+      "sector": "Consument",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "LUV",
+      "name": "Southwest Airlines",
+      "sector": "Transport",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "RCL",
+      "name": "Royal Caribbean",
       "sector": "Consument",
       "signal": "Neutraal",
       "signal_class": "neutral"
@@ -618,8 +534,22 @@
       "signal_class": "neutral"
     },
     {
+      "ticker": "WYNN",
+      "name": "Wynn Resorts",
+      "sector": "Consument",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
       "ticker": "TLRY",
       "name": "Tilray Brands",
+      "sector": "Healthcare",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "SNDL",
+      "name": "SNDL Inc",
       "sector": "Healthcare",
       "signal": "Neutraal",
       "signal_class": "neutral"
@@ -646,6 +576,20 @@
       "signal_class": "neutral"
     },
     {
+      "ticker": "AAPL",
+      "name": "Apple Inc",
+      "sector": "Technologie",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "Alphabet Inc",
+      "sector": "Technologie",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
       "ticker": "META",
       "name": "Meta Platforms",
       "sector": "Technologie",
@@ -653,37 +597,30 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "GM",
-      "name": "General Motors",
-      "sector": "Automotive",
+      "ticker": "AMD",
+      "name": "Advanced Micro Devices",
+      "sector": "Technologie",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "JPM",
-      "name": "JPMorgan Chase",
-      "sector": "Financieel",
+      "ticker": "CMCSA",
+      "name": "Comcast Corp",
+      "sector": "Communicatie",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
     {
-      "ticker": "GS",
-      "name": "Goldman Sachs",
-      "sector": "Financieel",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "C",
-      "name": "Citigroup",
-      "sector": "Financieel",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "WMT",
-      "name": "Walmart Inc",
+      "ticker": "COST",
+      "name": "Costco Wholesale",
       "sector": "Retail",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "SBUX",
+      "name": "Starbucks Corporation",
+      "sector": "Consument",
       "signal": "Neutraal",
       "signal_class": "neutral"
     },
@@ -695,8 +632,22 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "UPS",
-      "name": "United Parcel Service",
+      "ticker": "PFE",
+      "name": "Pfizer Inc",
+      "sector": "Healthcare",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "CVX",
+      "name": "Chevron Corporation",
+      "sector": "Energie",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "HON",
+      "name": "Honeywell International",
       "sector": "Industrieel",
       "signal": "Neutraal",
       "signal_class": "neutral"
@@ -716,6 +667,13 @@
       "signal_class": "neutral"
     },
     {
+      "ticker": "TECH",
+      "name": "Bio-Techne",
+      "sector": "Healthcare",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
       "ticker": "BABA",
       "name": "Alibaba Group",
       "sector": "Consument",
@@ -730,20 +688,6 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "PG",
-      "name": "Procter & Gamble",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
-      "ticker": "APD",
-      "name": "Air Products & Chem",
-      "sector": "Materialen",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
       "ticker": "SHW",
       "name": "Sherwin-Williams",
       "sector": "Materialen",
@@ -751,29 +695,43 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "INTC",
-      "name": "Intel Corporation",
-      "sector": "Technologie",
-      "signal": "Voorzichtig",
-      "signal_class": "sell"
-    },
-    {
-      "ticker": "LCID",
-      "name": "Lucid Group",
+      "ticker": "TSLA",
+      "name": "Tesla Inc",
       "sector": "Automotive",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
     {
-      "ticker": "DIS",
-      "name": "Walt Disney Co",
-      "sector": "Communicatie",
+      "ticker": "F",
+      "name": "Ford Motor",
+      "sector": "Automotive",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
     {
-      "ticker": "CLSK",
-      "name": "CleanSpark Inc",
+      "ticker": "BAC",
+      "name": "Bank of America",
+      "sector": "Financieel",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "MS",
+      "name": "Morgan Stanley",
+      "sector": "Financieel",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "WFC",
+      "name": "Wells Fargo",
+      "sector": "Financieel",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "C",
+      "name": "Citigroup",
       "sector": "Financieel",
       "signal": "Voorzichtig",
       "signal_class": "sell"
@@ -793,8 +751,8 @@
       "signal_class": "sell"
     },
     {
-      "ticker": "PFE",
-      "name": "Pfizer Inc",
+      "ticker": "JNJ",
+      "name": "Johnson & Johnson",
       "sector": "Healthcare",
       "signal": "Voorzichtig",
       "signal_class": "sell"
@@ -807,30 +765,37 @@
       "signal_class": "sell"
     },
     {
-      "ticker": "HON",
-      "name": "Honeywell International",
-      "sector": "Industrieel",
+      "ticker": "NET",
+      "name": "Cloudflare Inc",
+      "sector": "Technologie",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
     {
-      "ticker": "RCL",
-      "name": "Royal Caribbean",
+      "ticker": "DDOG",
+      "name": "Datadog Inc",
+      "sector": "Technologie",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "MDB",
+      "name": "MongoDB Inc",
+      "sector": "Technologie",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "CCL",
+      "name": "Carnival Corp",
       "sector": "Consument",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
     {
-      "ticker": "HOOD",
-      "name": "Robinhood Markets",
-      "sector": "Financieel",
-      "signal": "Voorzichtig",
-      "signal_class": "sell"
-    },
-    {
-      "ticker": "PATH",
-      "name": "UiPath Inc",
-      "sector": "Technologie",
+      "ticker": "JNJ",
+      "name": "Johnson & Johnson",
+      "sector": "Healthcare",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
@@ -842,16 +807,16 @@
       "signal_class": "sell"
     },
     {
-      "ticker": "MSFT",
-      "name": "Microsoft Corporation",
-      "sector": "Technologie",
+      "ticker": "AMZN",
+      "name": "Amazon.com Inc",
+      "sector": "Consument",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
     {
-      "ticker": "AMZN",
-      "name": "Amazon.com Inc",
-      "sector": "Consument",
+      "ticker": "ADBE",
+      "name": "Adobe Inc",
+      "sector": "Technologie",
       "signal": "Voorzichtig",
       "signal_class": "sell"
     },
@@ -872,6 +837,13 @@
     {
       "ticker": "ZS",
       "name": "Zscaler Inc",
+      "sector": "Technologie",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "CRWD",
+      "name": "CrowdStrike Holdings",
       "sector": "Technologie",
       "signal": "Voorzichtig",
       "signal_class": "sell"
@@ -912,44 +884,37 @@
       "signal_class": "sell"
     },
     {
-      "ticker": "AAPL",
-      "name": "Apple Inc",
+      "ticker": "PATH",
+      "name": "UiPath Inc",
+      "sector": "Technologie",
+      "signal": "Voorzichtig",
+      "signal_class": "sell"
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft Corporation",
       "sector": "Technologie",
       "signal": "Verkoop",
       "signal_class": "sell-strong"
     },
     {
-      "ticker": "BAC",
-      "name": "Bank of America",
+      "ticker": "LCID",
+      "name": "Lucid Group",
+      "sector": "Automotive",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "DIS",
+      "name": "Walt Disney Co",
+      "sector": "Communicatie",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPMorgan Chase",
       "sector": "Financieel",
-      "signal": "Verkoop",
-      "signal_class": "sell-strong"
-    },
-    {
-      "ticker": "MS",
-      "name": "Morgan Stanley",
-      "sector": "Financieel",
-      "signal": "Verkoop",
-      "signal_class": "sell-strong"
-    },
-    {
-      "ticker": "WFC",
-      "name": "Wells Fargo",
-      "sector": "Financieel",
-      "signal": "Verkoop",
-      "signal_class": "sell-strong"
-    },
-    {
-      "ticker": "DAL",
-      "name": "Delta Air Lines",
-      "sector": "Transport",
-      "signal": "Verkoop",
-      "signal_class": "sell-strong"
-    },
-    {
-      "ticker": "AAL",
-      "name": "American Airlines",
-      "sector": "Transport",
       "signal": "Verkoop",
       "signal_class": "sell-strong"
     },
@@ -964,6 +929,41 @@
       "ticker": "MA",
       "name": "Mastercard Inc",
       "sector": "Financieel",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "CLSK",
+      "name": "CleanSpark Inc",
+      "sector": "Financieel",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "DAL",
+      "name": "Delta Air Lines",
+      "sector": "Transport",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "UAL",
+      "name": "United Airlines",
+      "sector": "Transport",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "AAL",
+      "name": "American Airlines",
+      "sector": "Transport",
+      "signal": "Verkoop",
+      "signal_class": "sell-strong"
+    },
+    {
+      "ticker": "MGM",
+      "name": "MGM Resorts",
+      "sector": "Consument",
       "signal": "Verkoop",
       "signal_class": "sell-strong"
     }
