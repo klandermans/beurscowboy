@@ -29,38 +29,47 @@ ARCHIVE_DIR = "docs/archive"
 # ============= LLM SENTIMENT ANALYSIS =============
 # Qwen Agent voor sentiment analyse (gratis via Dashscope)
 
-def get_llm_sentiment(ticker, headlines):
+def get_batch_llm_sentiment(ticker_headlines_map):
     """
-    Analyseer sentiment van headlines met Qwen LLM.
+    Analyseer sentiment voor meerdere aandelen in één LLM call.
+    ticker_headlines_map: dict van {ticker: [headlines]}
     """
-    if not headlines:
-        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
-
-    valid_headlines = [h for h in headlines[:5] if h is not None]
-    if not valid_headlines:
-        return {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"}
-
-    # Bereid de headlines voor
-    headlines_text = "\n".join(f"- {h}" for h in valid_headlines)
+    if not ticker_headlines_map:
+        return {}
     
-    # Prompt voor sentiment analyse
-    prompt = f"""Je bent een financiële sentiment analist. Analyseer het volgende nieuws over {ticker}:
+    # Bereid de input voor
+    input_text = ""
+    tickers = list(ticker_headlines_map.keys())
+    
+    for ticker in tickers:
+        headlines = ticker_headlines_map[ticker][:3]  # Max 3 headlines per ticker
+        if headlines:
+            headlines_text = "\n".join(f"  - {h}" for h in headlines if h)
+            input_text += f"\n{ticker}:\n{headlines_text}\n"
+    
+    if not input_text.strip():
+        return {ticker: {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"} for ticker in tickers}
+    
+    # Prompt voor batch sentiment analyse
+    prompt = f"""Je bent een financiële sentiment analist. Analyseer het nieuws voor deze aandelen:
 
-{headlines_text}
+{input_text}
 
-Geef je antwoord in het Nederlands als JSON in dit formaat:
+Geef je antwoord ALS ALLEEN EEN JSON OBJECT in dit formaat (geen extra tekst):
 {{
-    "score": <getal tussen -1.0 en 1.0, waar -1 zeer negatief en 1 zeer positief>,
-    "summary": "<korte samenvatting in 1 zin>",
-    "catalyst": "<belangrijkste catalyst of 'Geen'>"
+    "TICKER1": {{"score": <getal -1.0 tot 1.0>, "summary": "<1 zin>", "catalyst": "<catalyst of 'Geen'>"}},
+    "TICKER2": {{"score": <getal -1.0 tot 1.0>, "summary": "<1 zin>", "catalyst": "<catalyst of 'Geen'>"}},
+    ...
 }}
 
 Score richtlijnen:
 - Zeer negatief (-1.0 tot -0.6): slechte cijfers, ontslagen, schandalen
-- Negatief (-0.6 tot -0.3): tegenvallers, waarschuwingen
+- Negatief (-0.6 tot -0.3): tegenvallers, waarschuwingen  
 - Neutraal (-0.3 tot 0.3): gemengd, geen duidelijke trend
 - Positief (0.3 tot 0.6): goede cijfers, groei, partnerships
-- Zeer positief (0.6 tot 1.0): records, doorbraken, upgrades"""
+- Zeer positief (0.6 tot 1.0): records, doorbraken, upgrades
+
+Geef ALLEEN de JSON terug, geen uitleg."""
 
     try:
         # Initialiseer de assistant
@@ -75,21 +84,39 @@ Score richtlijnen:
         response_text = response if isinstance(response, str) else str(response)
         
         # Extraheer JSON uit de response
-        json_match = re.search(r'\{[^{}]*\}', response_text, re.DOTALL)
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
         if json_match:
             result = json.loads(json_match.group())
-            return {
-                "score": round(float(result.get("score", 0.0)), 2),
-                "summary": result.get("summary", "Gemengd nieuws"),
-                "catalyst": result.get("catalyst", "Geen")
-            }
+            
+            # Zorg dat alle tickers een resultaat hebben
+            sentiments = {}
+            for ticker in tickers:
+                if ticker in result:
+                    sentiments[ticker] = {
+                        "score": round(float(result[ticker].get("score", 0.0)), 2),
+                        "summary": result[ticker].get("summary", "Gemengd nieuws"),
+                        "catalyst": result[ticker].get("catalyst", "Geen")
+                    }
+                else:
+                    sentiments[ticker] = {"score": 0.0, "summary": "Geen analyse", "catalyst": "Geen"}
+            
+            return sentiments
         else:
-            return {"score": 0.0, "summary": "LLM analyse fout", "catalyst": "Geen"}
+            return {ticker: {"score": 0.0, "summary": "LLM fout", "catalyst": "Geen"} for ticker in tickers}
             
     except Exception as e:
-        # Fallback naar keyword-based bij fout
-        print(f"  LLM fout voor {ticker}, fallback naar keyword: {e}")
-        return get_keyword_sentiment_fallback(ticker, headlines)
+        print(f"Batch LLM fout: {e}")
+        # Fallback naar keyword-based voor alle
+        return {ticker: get_keyword_sentiment_fallback(ticker, ticker_headlines_map.get(ticker, [])) 
+                for ticker in tickers}
+
+def get_llm_sentiment(ticker, headlines):
+    """
+    Wrapper voor batch LLM sentiment - wordt later gebatched aangeroepen.
+    """
+    # Deze functie wordt niet meer individueel aangeroepen
+    # Zie get_batch_llm_sentiment()
+    return get_keyword_sentiment_fallback(ticker, headlines)
 
 def get_keyword_sentiment_fallback(ticker, headlines):
     """
@@ -433,7 +460,12 @@ def analyze():
     
     results = []
     snapshot_data = {}
-
+    
+    # Eerste pass: verzamel alle headlines voor batch sentiment analyse
+    print("\n📰 Verzamel nieuws headlines...")
+    ticker_headlines = {}
+    ticker_data = {}  # Sla technische data tijdelijk op
+    
     for ticker in TICKERS:
         print(f"  {ticker}...", end=" ")
         try:
@@ -443,9 +475,41 @@ def analyze():
             if hist.empty:
                 print("❌")
                 continue
-
+            
+            # Verzamel headlines
+            news = t.news
+            headlines = [n.get('title') for n in news if n.get('title')]
+            ticker_headlines[ticker] = headlines[:3]  # Max 3 headlines
+            
+            # Sla technische data op voor later
             current_price = hist['Close'].iloc[-1]
             avg_price = hist['Close'].mean()
+            
+            ticker_data[ticker] = {
+                'hist': hist,
+                'current_price': current_price,
+                'avg_price': avg_price,
+                'news': news,
+                'ticker_obj': t
+            }
+            print(f"✓ {len(headlines)} headlines")
+            
+        except Exception as e:
+            print(f"❌ {e}")
+    
+    # Batch LLM sentiment analyse
+    print("\n🤖 LLM Sentiment analyse (batch)...")
+    sentiments = get_batch_llm_sentiment(ticker_headlines)
+    
+    # Tweede pass: verwerk alle technische data met sentiment
+    print("\n📊 Verwerk technische analyse...")
+    for ticker in ticker_data:
+        try:
+            data = ticker_data[ticker]
+            hist = data['hist']
+            current_price = data['current_price']
+            avg_price = data['avg_price']
+            news = data['news']
             
             rsi = calculate_rsi(hist['Close']).iloc[-1]
             macd_val, macd_signal, macd_hist = calculate_macd(hist['Close'])
@@ -456,8 +520,8 @@ def analyze():
             high_52w = hist['High'].max()
             low_52w = hist['Low'].min()
             
-            news = t.news
-            sentiment = get_sentiment(ticker, [n.get('title') for n in news])
+            # Gebruik batch sentiment resultaat
+            sentiment = sentiments.get(ticker, {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"})
             
             setup_score, setup_reasons = calculate_setup_score(
                 rsi, macd_val, macd_signal, macd_hist,
