@@ -4,3 +4,4 @@ numpy
 lxml
 feedparser
 soundfile
+qwen-agent

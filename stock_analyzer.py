@@ -40,9 +40,9 @@ def get_batch_llm_sentiment(ticker_headlines_map):
     # Bereid de input voor
     input_text = ""
     tickers = list(ticker_headlines_map.keys())
-    
+
     for ticker in tickers:
-        headlines = ticker_headlines_map[ticker][:3]  # Max 3 headlines per ticker
+        headlines = ticker_headlines_map[ticker][:7]  # Max 7 headlines per ticker voor betere analyse
         if headlines:
             headlines_text = "\n".join(f"  - {h}" for h in headlines if h)
             input_text += f"\n{ticker}:\n{headlines_text}\n"
@@ -263,12 +263,100 @@ NEGATIVE_KEYWORDS = [
     'rechtszaak', 'onderzoek', 'boete', 'terugroep', 'storing', 'fout'
 ]
 
-# RSS Feeds (gratis)
+# RSS Feeds (gratis) - uitgebreid voor meer nieuwsbronnen
 RSS_FEEDS = {
+    # Algemeen markt nieuws
     'marketwatch': 'https://feeds.marketwatch.com/marketwatch/topstories/',
     'reuters_business': 'https://www.reutersagency.com/feed/',
     'yahoo_finance': 'https://finance.yahoo.com/news/rssindex',
+    'investing_general': 'https://www.investing.com/rss/news.rss',
+    # Sector specifiek
+    'tech_crunch': 'https://techcrunch.com/feed/',
+    'reuters_technology': 'https://www.reutersagency.com/feed/?post_type=best&taxonomy=topic&term=technology',
+    'seeking_alpha': 'https://seekingalpha.com/feed.xml',
+    # Financieel nieuws
+    'bloomberg_markets': 'https://feeds.bloomberg.com/markets/news.rss',
+    'cnbc_top_news': 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114',
+    'financial_times': 'https://www.ft.com/?format=rss',
+    # Crypto & Specifiek
+    'coindesk': 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+    'benzinga': 'https://www.benzinga.com/news/feed',
 }
+
+# Aantal headlines om op te halen per feed
+RSS_FEED_LIMIT = 30  # Meer artikelen per feed
+
+# ============= STOCKTWITS TRENDING =============
+
+def fetch_stocktwits_trending():
+    """
+    Haal trending symbols op van StockTwits API.
+    Retourneert lijst van trending tickers met watchlist count en sentiment.
+    """
+    url = "https://api.stocktwits.com/api/2/trending/symbols.json"
+    
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json'
+            }
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+        
+        trending = []
+        for symbol in data.get('symbols', []):
+            trending.append({
+                'symbol': symbol.get('symbol', ''),
+                'title': symbol.get('title', ''),
+                'watchlist_count': symbol.get('watchlist_count', 0),
+                'sentiment': symbol.get('sentiment', None)
+            })
+        
+        print(f"  ✓ StockTwits: {len(trending)} trending symbols")
+        return trending
+    
+    except Exception as e:
+        print(f"  ⚠️ StockTwits error: {e}")
+        return []
+
+def get_stocktwits_messages(symbol, limit=10):
+    """
+    Haal recente messages op voor een specifiek symbol van StockTwits.
+    Let: StockTwits API vereist nu authenticatie, return lege lijst.
+    """
+    # API vereist authenticatie - return lege lijst
+    # Fallback: gebruik watchlist count als populariteitsindicator
+    return []
+
+def analyze_stocktwits_sentiment(messages):
+    """
+    Analyseer sentiment van StockTwits messages.
+    Retourneert score tussen -1.0 en 1.0.
+    """
+    if not messages:
+        return 0.0
+    
+    bullish_count = 0
+    bearish_count = 0
+    
+    for msg in messages:
+        sentiment = msg.get('sentiment')
+        if sentiment == 'Bullish':
+            bullish_count += 1
+        elif sentiment == 'Bearish':
+            bearish_count += 1
+    
+    total = bullish_count + bearish_count
+    if total == 0:
+        return 0.0
+    
+    # Score: positief = bullish, negatief = bearish
+    score = (bullish_count - bearish_count) / total
+    return round(score, 2)
 
 # ============= TECHNICAL INDICATORS =============
 
@@ -338,22 +426,29 @@ def get_sentiment(ticker, headlines):
 def fetch_rss_news():
     """
     Haal nieuws op van gratis RSS feeds.
+    Verzamelt meer artikelen voor betere sentiment analyse.
     """
     all_news = []
-    
+
     for source, url in RSS_FEEDS.items():
         try:
             feed = feedparser.parse(url)
-            for entry in feed.entries[:10]:
+            # Haal meer artikelen op per feed
+            limit = min(RSS_FEED_LIMIT, len(feed.entries))
+            for entry in feed.entries[:limit]:
                 all_news.append({
                     'source': source,
                     'title': entry.title,
                     'link': entry.link,
-                    'published': entry.get('published', '')
+                    'published': entry.get('published', ''),
+                    'summary': entry.get('summary', '')[:500] if entry.get('summary') else ''
                 })
         except Exception as e:
-            pass  # Negeer fouten, we hebben genoeg nieuws van Yahoo
-    
+            # Log alleen belangrijke fouten
+            if '404' not in str(e) and 'timeout' not in str(e).lower():
+                print(f"  RSS feed {source}: {e}")
+
+    print(f"  Totaal: {len(all_news)} artikelen van {len(RSS_FEEDS)} bronnen")
     return all_news
 
 # ============= SCORING =============
@@ -465,26 +560,37 @@ def analyze():
     print("\n📰 Verzamel nieuws headlines...")
     ticker_headlines = {}
     ticker_data = {}  # Sla technische data tijdelijk op
-    
+
+    # Haal eerst algemene markt nieuws op via RSS
+    print("  RSS feeds ophalen...", end=" ")
+    market_news = fetch_rss_news()
+    print(f"✓ {len(market_news)} artikelen")
+
     for ticker in TICKERS:
         print(f"  {ticker}...", end=" ")
         try:
             t = yf.Ticker(ticker)
             hist = t.history(period="1y")
-            
+
             if hist.empty:
                 print("❌")
                 continue
-            
-            # Verzamel headlines
+
+            # Verzamel headlines van Yahoo Finance
             news = t.news
             headlines = [n.get('title') for n in news if n.get('title')]
-            ticker_headlines[ticker] = headlines[:3]  # Max 3 headlines
-            
+
+            # Als Yahoo geen headlines heeft, gebruik dan algemene markt nieuws
+            if not headlines:
+                # Gebruik meer markt nieuws voor betere context
+                headlines = [f"{ticker} - {item['title']}" for item in market_news[:10]]
+
+            ticker_headlines[ticker] = headlines[:10]  # Max 10 headlines voor betere sentiment analyse
+
             # Sla technische data op voor later
             current_price = hist['Close'].iloc[-1]
             avg_price = hist['Close'].mean()
-            
+
             ticker_data[ticker] = {
                 'hist': hist,
                 'current_price': current_price,
@@ -493,13 +599,27 @@ def analyze():
                 'ticker_obj': t
             }
             print(f"✓ {len(headlines)} headlines")
-            
+
         except Exception as e:
             print(f"❌ {e}")
     
     # Batch LLM sentiment analyse
     print("\n🤖 LLM Sentiment analyse (batch)...")
     sentiments = get_batch_llm_sentiment(ticker_headlines)
+
+    # StockTwits trending sentiment
+    print("\n📈 StockTwits trending sentiment...")
+    trending_symbols = fetch_stocktwits_trending()
+    stocktwits_trending = {}
+
+    # Gebruik watchlist count als populariteitsindicator
+    for item in trending_symbols[:10]:  # Max 10
+        symbol = item['symbol']
+        if symbol in ticker_data:
+            watchlist_count = item['watchlist_count']
+            stocktwits_trending[symbol] = watchlist_count
+            # Geef trending symbols een kleine bonus gebaseerd op populariteit
+            print(f"  {symbol}: {watchlist_count:,} watchlist")
     
     # Tweede pass: verwerk alle technische data met sentiment
     print("\n📊 Verwerk technische analyse...")
@@ -519,15 +639,28 @@ def analyze():
             vol_rank = get_volatility_rank(hist)
             high_52w = hist['High'].max()
             low_52w = hist['Low'].min()
-            
+
             # Gebruik batch sentiment resultaat
             sentiment = sentiments.get(ticker, {"score": 0.0, "summary": "Geen nieuws", "catalyst": "Geen"})
-            
+
+            # Voeg StockTwits trending bonus toe gebaseerd op watchlist count
+            watchlist_count = stocktwits_trending.get(ticker, None)
+            if watchlist_count:
+                # Hoe hoger de watchlist count, hoe groter de bonus (max +0.3)
+                # NVDA heeft ~640K watchlist, dus schalen naar 0-0.3
+                popularity_bonus = min(watchlist_count / 1000000 * 0.3, 0.3)
+                sentiment['score'] += popularity_bonus
+                sentiment['stocktwits_watchlist'] = watchlist_count
+                sentiment['is_trending'] = True
+            else:
+                sentiment['stocktwits_watchlist'] = None
+                sentiment['is_trending'] = False
+
             setup_score, setup_reasons = calculate_setup_score(
                 rsi, macd_val, macd_signal, macd_hist,
                 current_price, sma_20, sma_50, atr, avg_price
             )
-            
+
             total_score = setup_score + (sentiment['score'] * 3)
             potential_upside = calculate_potential_upside(current_price, sma_20, sma_50, high_52w, atr)
             setup_type = get_trade_setup_type(rsi, macd_hist, current_price, sma_20, sma_50)
@@ -558,6 +691,7 @@ def analyze():
                 "sentiment_score": round(sentiment['score'], 2),
                 "sentiment_summary": sentiment['summary'],
                 "catalyst": sentiment['catalyst'],
+                "is_trending": sentiment.get('is_trending', False),
                 "signal": signal,
                 "signal_class": signal_class,
                 "high_52w": round(high_52w, 2),
@@ -575,10 +709,14 @@ def analyze():
 
     results.sort(key=lambda x: x['setup_score'], reverse=True)
 
+    # Verzamel trending stocks voor weergave
+    trending_stocks = [r for r in results if r.get('is_trending', False)]
+
     print(f"\n📝 Generating site...")
-    generate_main_site(results, today)
+    generate_main_site(results, today, trending_stocks)
     generate_article(results, today)
     generate_watchlist(results, today)
+    generate_archive(results, today)
     save_snapshot(snapshot_data, today_str)
     generate_search_data(results, today_str)
 
@@ -705,12 +843,15 @@ def get_sector(ticker):
 
 # ============= SITE GENERATION =============
 
-def generate_main_site(results, today):
+def generate_main_site(results, today, trending_stocks=None):
     """Generate the main index.html - complete financial platform"""
-    
+
     date_str = today.strftime("%Y-%m-%d")
     date_display = today.strftime("%d %B %Y")
-    
+
+    if trending_stocks is None:
+        trending_stocks = []
+
     # Market overview stats
     bullish = len([r for r in results if r['setup_score'] > 0])
     bearish = len([r for r in results if r['setup_score'] < 0])
@@ -726,9 +867,10 @@ def generate_main_site(results, today):
         change_class = "positive" if r['change_pct'] >= 0 else "negative"
         change_sign = "+" if r['change_pct'] >= 0 else ""
         signal_class = r['signal_class']
+        trending_badge = "🔥" if r.get('is_trending', False) else ""
         market_rows += f"""
         <tr class="stock-row" data-ticker="{r['ticker']}" data-sector="{r['sector']}" data-signal="{r['signal_class']}">
-            <td class="ticker"><strong>{r['ticker']}</strong><br><small>{r['name']}</small></td>
+            <td class="ticker"><strong>{r['ticker']}</strong>{trending_badge}<br><small>{r['name']}</small></td>
             <td class="sector">{r['sector']}</td>
             <td class="price">€{r['price']:.2f}</td>
             <td class="change {change_class}">{change_sign}{r['change_pct']:.2f}%</td>
@@ -772,6 +914,29 @@ def generate_main_site(results, today):
             </ul>
             <a href="article/{date_str}.html#{pick['ticker']}" class="read-more">Lees analyse →</a>
         </article>"""
+
+    # Generate trending stocks section
+    trending_section = ""
+    if trending_stocks:
+        trending_rows = ""
+        for t in trending_stocks[:5]:  # Top 5 trending
+            wl_count = t.get('stocktwits_watchlist', 0)
+            trending_rows += f"""
+            <div class="trending-item">
+                <span class="trending-ticker">{t['ticker']}</span>
+                <span class="trending-watchlist">👁 {wl_count:,}</span>
+                <span class="trending-price">€{t['price']:.2f}</span>
+                <span class="trending-change {'positive' if t['change_pct'] >= 0 else 'negative'}">{'+' if t['change_pct'] >= 0 else ''}{t['change_pct']:.1f}%</span>
+            </div>"""
+        
+        trending_section = f"""
+        <section class="trending-section">
+            <h2>🔥 Trending op StockTwits</h2>
+            <p class="section-subtitle">Meest gevolgde aandelen vandaag</p>
+            <div class="trending-grid">
+                {trending_rows}
+            </div>
+        </section>"""
     
     html = f"""<!DOCTYPE html>
 <html lang="nl">
@@ -782,6 +947,54 @@ def generate_main_site(results, today):
     <meta name="theme-color" content="#059669">
     <title>Beurs Cowboy | Markt Analyse | {date_display}</title>
     <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .trending-section {{
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            border-radius: 12px;
+            color: white;
+        }}
+        .trending-section h2 {{
+            color: white;
+            margin-bottom: 0.5rem;
+        }}
+        .trending-section .section-subtitle {{
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 1.5rem;
+        }}
+        .trending-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }}
+        .trending-item {{
+            background: rgba(255,255,255,0.15);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+        }}
+        .trending-ticker {{
+            font-weight: 700;
+            font-size: 1.2rem;
+        }}
+        .trending-watchlist {{
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }}
+        .trending-price {{
+            font-weight: 600;
+        }}
+        .trending-change.positive {{
+            color: #86efac;
+        }}
+        .trending-change.negative {{
+            color: #fca5a5;
+        }}
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -873,6 +1086,9 @@ def generate_main_site(results, today):
                     </div>
                 </div>
             </div>
+
+            <!-- Trending Stocks -->
+            {trending_section}
 
             <!-- Top Picks -->
             <div class="top-picks-section">
@@ -1137,6 +1353,296 @@ def generate_search_data(results, date_str):
     }
     with open(os.path.join(OUTPUT_DIR, "search-index.json"), "w") as f:
         json.dump(search_index, f, indent=2)
+
+def generate_archive(results, today):
+    """Generate archive.html - overview of all past analyses"""
+
+    date_str = today.strftime("%Y-%m-%d")
+    date_display = today.strftime("%d %B %Y")
+
+    # Get all snapshot files
+    snapshot_files = sorted(glob.glob(os.path.join(DATA_DIR, "snap_*.json")), reverse=True)
+
+    archives = []
+    for snap_file in snapshot_files:
+        # Extract date from filename
+        match = re.search(r'snap_(\d{4}-\d{2}-\d{2})\.json', snap_file)
+        if match:
+            snap_date = match.group(1)
+            try:
+                with open(snap_file, 'r') as f:
+                    data = json.load(f)
+
+                # Calculate stats
+                total_stocks = len(data)
+                buy_signals = sum(1 for d in data.values() if d.get('signal') in ['Koop', 'Sterk Koop'])
+                sell_signals = sum(1 for d in data.values() if d.get('signal') in ['Verkoop', 'Sterk Verkoop', 'Voorzichtig'])
+                avg_score = sum(d.get('setup_score', 0) for d in data.values()) / total_stocks if total_stocks else 0
+
+                # Get file modification timestamp
+                file_mtime = os.path.getmtime(snap_file)
+                file_datetime = datetime.datetime.fromtimestamp(file_mtime)
+                timestamp = file_datetime.strftime("%H:%M")
+
+                # Parse date for display
+                date_obj = datetime.datetime.strptime(snap_date, "%Y-%m-%d").date()
+                display_date = date_obj.strftime("%d %B %Y").replace("January", "januari").replace("February", "februari").replace("March", "maart").replace("April", "april").replace("May", "mei").replace("June", "juni").replace("July", "juli").replace("August", "augustus").replace("September", "september").replace("October", "oktober").replace("November", "november").replace("December", "december")
+
+                archives.append({
+                    'date': snap_date,
+                    'display_date': display_date,
+                    'timestamp': timestamp,
+                    'total': total_stocks,
+                    'buy_signals': buy_signals,
+                    'sell_signals': sell_signals,
+                    'avg_score': round(avg_score, 1)
+                })
+            except Exception as e:
+                print(f"  ⚠️ Could not read {snap_file}: {e}")
+
+    # Generate archive rows
+    archive_rows = ""
+    for arch in archives:
+        archive_rows += f"""
+                <li class="archive-item">
+                    <div>
+                        <span class="archive-date">{arch['display_date']} <small style="color: var(--text-muted); font-weight: normal;">({arch['timestamp']})</small></span>
+                        <div class="archive-stats">
+                            <span>{arch['total']} aandelen</span>
+                            <span>{arch['buy_signals']} Koop</span>
+                            <span>{arch['sell_signals']} Verkoop/Voorzichtig</span>
+                            <span>Gem. score: {arch['avg_score']}</span>
+                        </div>
+                    </div>
+                    <a href="index.html" class="archive-link">Bekijk →</a>
+                </li>"""
+    
+    # If no archives, show message
+    if not archives:
+        archive_rows = """
+                <li class="no-archives">
+                    <p>Nog geen archief beschikbaar. Dagelijkse rapporten worden automatisch gegenereerd.</p>
+                </li>"""
+    
+    html = f"""<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archief | Beurs Cowboy</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .archive-nav {{
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }}
+        .archive-nav button {{
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }}
+        .archive-nav button:hover,
+        .archive-nav button.active {{
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }}
+        .archive-list {{
+            list-style: none;
+            padding: 0;
+        }}
+        .archive-item {{
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }}
+        .archive-item:hover {{
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }}
+        .archive-date {{
+            font-weight: 600;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 8px;
+        }}
+        .archive-stats {{
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }}
+        .archive-stats span {{
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }}
+        .archive-link {{
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            white-space: nowrap;
+        }}
+        .archive-link:hover {{
+            text-decoration: underline;
+        }}
+        .no-archives {{
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" class="logo-link">
+                    <span class="logo-icon">🤠</span>
+                    <span class="logo-text">Beurs<span class="highlight">Cowboy</span></span>
+                </a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="main-nav" id="mainNav">
+                <a href="index.html">Markten</a>
+                <a href="analysis.html">Analyse</a>
+                <a href="watchlist.html">Watchlist</a>
+                <a href="archive.html" class="active">Archief</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <button class="search-toggle" id="searchToggle" aria-label="Search">
+                    🔍
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="searchBar">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Zoek in archief..." aria-label="Search">
+            <button class="search-close" id="searchClose">✕</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="content-section">
+            <div class="section-header">
+                <h1>Archief</h1>
+                <p class="section-subtitle">Eerdere marktanalyses en rapporten</p>
+            </div>
+
+            <div class="archive-nav">
+                <button class="active" data-period="all">Alle</button>
+                <button data-period="week">Deze Week</button>
+                <button data-period="month">Deze Maand</button>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <span class="stat-icon">📚</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{len(archives)}</span>
+                        <span class="stat-label">Rapporten</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📅</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{archives[0]['display_date'] if archives else '-'}</span>
+                        <span class="stat-label">Laatste Update</span>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="archive-list" id="archive-list">
+                {archive_rows}
+            </ul>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>🤠 Beurs Cowboy</h4>
+                    <p>Dagelijkse beursanalyse met een westelijk tintje. AI-powered, cowboy-goedgekeurd.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Disclaimer</h4>
+                    <p>Dit is geen financieel advies. Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Data Bronnen</h4>
+                    <p>Prijzen: Yahoo Finance<br>Sentiment: Qwen LLM<br>Wijsheid: Het Wilde Westen</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {today.year} Beurs Cowboy. Yeehaw! 🤠 Alle rechten voorbehouden.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/main.js"></script>
+    <script>
+        // Archive filtering
+        document.querySelectorAll('.archive-nav button').forEach(btn => {{
+            btn.addEventListener('click', function() {{
+                document.querySelectorAll('.archive-nav button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const period = this.dataset.period;
+                const items = document.querySelectorAll('.archive-item');
+                const now = new Date();
+
+                items.forEach(item => {{
+                    const dateText = item.querySelector('.archive-date').textContent;
+                    const itemDate = new Date(dateText);
+                    const diffDays = (now - itemDate) / (1000 * 60 * 60 * 24);
+
+                    if (period === 'all') {{
+                        item.style.display = 'flex';
+                    }} else if (period === 'week' && diffDays <= 7) {{
+                        item.style.display = 'flex';
+                    }} else if (period === 'month' && diffDays <= 30) {{
+                        item.style.display = 'flex';
+                    }} else {{
+                        item.style.display = 'none';
+                    }}
+                }});
+            }});
+        }});
+    </script>
+</body>
+</html>"""
+
+    with open(os.path.join(OUTPUT_DIR, "archive.html"), "w") as f:
+        f.write(html)
 
 def generate_watchlist(results, today):
     """Generate watchlist.html - stocks with potential but not yet buy signals"""
