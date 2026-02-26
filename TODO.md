@@ -28,6 +28,10 @@
   - Interactieve charts met RSI, MACD, Moving Averages
   - Key metrics grid
   - Analyse sectie met sentiment en redenen
+- [x] **Social Media trending sectie** - Subtielere styling
+  - "💬 Trending op Social Media" i.p.v. StockTwits branding
+  - Past beter in het Beurs Cowboy thema
+  - Hover effects en subtiele kleuren
 
 ---
 

@@ -436,13 +436,6 @@
       "signal_class": "neutral"
     },
     {
-      "ticker": "BABA",
-      "name": "Alibaba Group",
-      "sector": "Consument",
-      "signal": "Neutraal",
-      "signal_class": "neutral"
-    },
-    {
       "ticker": "GOOGL",
       "name": "Alphabet Inc",
       "sector": "Technologie",
@@ -550,6 +543,13 @@
     {
       "ticker": "PENN",
       "name": "Penn Entertainment",
+      "sector": "Consument",
+      "signal": "Neutraal",
+      "signal_class": "neutral"
+    },
+    {
+      "ticker": "BABA",
+      "name": "Alibaba Group",
       "sector": "Consument",
       "signal": "Neutraal",
       "signal_class": "neutral"

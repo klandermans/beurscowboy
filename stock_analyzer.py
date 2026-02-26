@@ -193,11 +193,11 @@ TICKERS = [
     # Tech / Software (6)
     'ORCL', 'CRM', 'ADBE', 'NOW', 'INTU', 'PLTR',
     # Social / Media (5)
-    'NFLX', 'DIS', 'CMCSA', 'PARA', 'WBD',
+    'NFLX', 'DIS', 'CMCSA', 'WBD',
     # Finance - Banks (6)
     'JPM', 'BAC', 'GS', 'MS', 'WFC', 'C',
     # Finance - Payments (5)
-    'V', 'MA', 'PYPL', 'SQ', 'AFRM',
+    'V', 'MA', 'PYPL', 'AFRM',
     # Finance - Crypto (5)
     'COIN', 'MARA', 'RIOT', 'CLSK', 'HUT',
     # Retail (6)
@@ -219,7 +219,7 @@ TICKERS = [
     # Telecom (4)
     'T', 'VZ', 'TMUS', 'CHTR',
     # Consumer Discretionary (6)
-    'MCD', 'NKE', 'LULU', 'DECK', 'CROX', 'SKX',
+    'MCD', 'NKE', 'LULU', 'DECK', 'CROX',
     # Airlines (4)
     'DAL', 'UAL', 'AAL', 'LUV',
     # Cruise Lines (3)
@@ -468,74 +468,95 @@ def get_sentiment(ticker, headlines):
     """
     return get_llm_sentiment(ticker, headlines)
 
-def fetch_rss_news(max_age_days=2):
+def fetch_rss_news(max_age_hours=24):
     """
     Haal nieuws op van gratis RSS feeds wereldwijd.
-    Filtert op recente artikelen (laatste max_age_days dagen).
+    Filtert op recente artikelen (laatste max_age_hours).
     """
     import datetime
+    import concurrent.futures
+    
     all_news = []
     successful_feeds = 0
     failed_feeds = []
+    skipped_old = 0
 
-    # Bereken cutoff datum (UTC, timezone-naive voor consistente vergelijking)
-    # Gebruik timezone-aware UTC en converteer naar naive
+    # Bereken cutoff datum (UTC)
     now_utc = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
-    cutoff_date = now_utc - datetime.timedelta(days=max_age_days)
+    cutoff_date = now_utc - datetime.timedelta(hours=max_age_hours)
 
-    for source, url in RSS_FEEDS.items():
+    def fetch_single_feed(source_url_tuple):
+        """Fetch een enkele RSS feed"""
+        nonlocal skipped_old
+        source, url = source_url_tuple
         try:
             feed = feedparser.parse(url)
             if not feed.entries:
-                failed_feeds.append(source)
-                continue
-                
-            successful_feeds += 1
+                return None, f"Geen entries"
+            
+            articles = []
             for entry in feed.entries[:RSS_FEED_LIMIT]:
-                # Parse publicatie datum
                 published_str = entry.get('published', '')
                 published_date = None
 
-                # Probeer verschillende datum formaten
                 for fmt in ['%a, %d %b %Y %H:%M:%S %Z', '%a, %d %b %Y %H:%M:%S GMT', '%Y-%m-%dT%H:%M:%S%z', '%Y-%m-%d %H:%M:%S']:
                     try:
                         published_date = datetime.datetime.strptime(published_str, fmt)
-                        # Maak timezone-naive voor vergelijking
                         if published_date.tzinfo is not None:
                             published_date = published_date.replace(tzinfo=None)
                         break
                     except (ValueError, TypeError):
                         continue
 
-                # Als datum parsing faalt, neem artikel dan toch mee (voor fallback)
-                if published_date is None:
-                    all_news.append({
+                # Check of artikel recent genoeg is
+                is_recent = published_date is None or published_date >= cutoff_date
+                if is_recent:
+                    # Bereken leeftijd in uren voor logging
+                    age_hours = None
+                    if published_date:
+                        age_hours = (now_utc - published_date).total_seconds() / 3600
+                    
+                    articles.append({
                         'source': source,
                         'title': entry.title,
                         'link': entry.link,
                         'published': published_str,
                         'summary': entry.get('summary', '')[:500] if entry.get('summary') else '',
-                        'is_recent': True
+                        'is_recent': True,
+                        'age_hours': age_hours
                     })
-                # Filter op recente artikelen
-                elif published_date >= cutoff_date:
-                    all_news.append({
-                        'source': source,
-                        'title': entry.title,
-                        'link': entry.link,
-                        'published': published_str,
-                        'summary': entry.get('summary', '')[:500] if entry.get('summary') else '',
-                        'is_recent': True
-                    })
+                else:
+                    skipped_old += 1
+            
+            return articles, None
+            
         except Exception as e:
-            # Log alleen belangrijke fouten
-            if '404' not in str(e) and 'timeout' not in str(e).lower():
-                failed_feeds.append(source)
+            return None, str(e)
+
+    # Fetch alle feeds parallel (max 10 concurrent)
+    feed_results = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_source = {executor.submit(fetch_single_feed, (source, url)): source 
+                          for source, url in RSS_FEEDS.items()}
+        for future in concurrent.futures.as_completed(future_to_source):
+            source = future_to_source[future]
+            articles, error = future.result()
+            feed_results.append((source, articles, error))
+    
+    # Verwerk resultaten
+    for source, articles, error in feed_results:
+        if articles:
+            all_news.extend(articles)
+            successful_feeds += 1
+        else:
+            failed_feeds.append(source)
 
     # Toon statistieken
     recent_count = sum(1 for n in all_news if n.get('is_recent', False))
-    print(f"  Wereldwijd: {len(all_news)} artikelen ({recent_count} recent)")
+    avg_age = sum(n.get('age_hours', 0) or 0 for n in all_news) / len(all_news) if all_news else 0
+    print(f"  Wereldwijd: {len(all_news)} artikelen ({recent_count} recent, {skipped_old} te oud)")
     print(f"  ✓ {successful_feeds} feeds succes, {len(failed_feeds)} overgeslagen")
+    print(f"  ⏱️  Gemiddelde leeftijd: {avg_age:.1f} uur")
     return all_news
 
 # ============= SCORING =============
@@ -839,13 +860,13 @@ def get_company_name(ticker):
         'ORCL': 'Oracle Corporation', 'CRM': 'Salesforce Inc', 'ADBE': 'Adobe Inc',
         'NOW': 'ServiceNow Inc', 'INTU': 'Intuit Inc', 'PLTR': 'Palantir Technologies',
         'NFLX': 'Netflix Inc', 'DIS': 'Walt Disney Co', 'CMCSA': 'Comcast Corp',
-        'PARA': 'Paramount Global', 'WBD': 'Warner Bros Discovery',
+        'WBD': 'Warner Bros Discovery',
         'JPM': 'JPMorgan Chase', 'BAC': 'Bank of America', 'GS': 'Goldman Sachs',
         'MS': 'Morgan Stanley', 'WFC': 'Wells Fargo', 'C': 'Citigroup',
         'COIN': 'Coinbase Global', 'MARA': 'Marathon Digital', 'RIOT': 'Riot Platforms',
         'CLSK': 'CleanSpark Inc', 'HUT': 'Hut 8 Mining',
         'V': 'Visa Inc', 'MA': 'Mastercard Inc', 'PYPL': 'PayPal Holdings',
-        'SQ': 'Block Inc', 'AFRM': 'Affirm Holdings',
+        'AFRM': 'Affirm Holdings',
         'WMT': 'Walmart Inc', 'TGT': 'Target Corporation', 'COST': 'Costco Wholesale',
         'HD': 'Home Depot', 'NKE': 'Nike Inc', 'SBUX': 'Starbucks Corporation',
         'JNJ': 'Johnson & Johnson', 'UNH': 'UnitedHealth Group', 'PFE': 'Pfizer Inc',
@@ -864,7 +885,7 @@ def get_company_name(ticker):
         'EQIX': 'Equinix Inc', 'SPG': 'Simon Property',
         'T': 'AT&T Inc', 'VZ': 'Verizon Comm', 'TMUS': 'T-Mobile US', 'CHTR': 'Charter Comm',
         'MCD': "McDonald's Corp", 'LULU': 'Lululemon Athletica', 'DECK': 'Deckers Outdoor',
-        'CROX': 'Crocs Inc', 'SKX': 'Skechers USA',
+        'CROX': 'Crocs Inc',
         'DAL': 'Delta Air Lines', 'UAL': 'United Airlines', 'AAL': 'American Airlines',
         'LUV': 'Southwest Airlines',
         'CCL': 'Carnival Corp', 'RCL': 'Royal Caribbean', 'NCLH': 'Norwegian Cruise',
@@ -924,7 +945,7 @@ def get_sector(ticker):
         'T': 'Communicatie', 'VZ': 'Communicatie', 'TMUS': 'Communicatie',
         'CHTR': 'Communicatie',
         'MCD': 'Consument', 'LULU': 'Consument', 'DECK': 'Consument',
-        'CROX': 'Consument', 'SKX': 'Consument',
+        'CROX': 'Consument',
         'DAL': 'Transport', 'UAL': 'Transport', 'AAL': 'Transport',
         'LUV': 'Transport',
         'CCL': 'Consument', 'RCL': 'Consument', 'NCLH': 'Consument',
@@ -1035,15 +1056,15 @@ def generate_main_site(results, today, trending_stocks=None):
             trending_rows += f"""
             <div class="trending-item">
                 <span class="trending-ticker">{t['ticker']}</span>
-                <span class="trending-watchlist">👁 {wl_count:,}</span>
+                <span class="trending-social">💬 {wl_count:,} volgers</span>
                 <span class="trending-price">€{t['price']:.2f}</span>
                 <span class="trending-change {'positive' if t['change_pct'] >= 0 else 'negative'}">{'+' if t['change_pct'] >= 0 else ''}{t['change_pct']:.1f}%</span>
             </div>"""
-        
+
         trending_section = f"""
         <section class="trending-section">
-            <h2>🔥 Trending op StockTwits</h2>
-            <p class="section-subtitle">Meest gevolgde aandelen vandaag</p>
+            <h2>💬 Trending op Social Media</h2>
+            <p class="section-subtitle">Meest besproken aandelen vandaag</p>
             <div class="trending-grid">
                 {trending_rows}
             </div>
@@ -1077,48 +1098,61 @@ def generate_main_site(results, today, trending_stocks=None):
         .trending-section {{
             margin: 2rem 0;
             padding: 1.5rem;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            color: white;
         }}
         .trending-section h2 {{
-            color: white;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }}
         .trending-section .section-subtitle {{
-            color: rgba(255,255,255,0.9);
+            color: var(--text-secondary);
             margin-bottom: 1.5rem;
         }}
         .trending-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
         }}
         .trending-item {{
-            background: rgba(255,255,255,0.15);
+            background: var(--bg-tertiary);
             padding: 1rem;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }}
+        .trending-item:hover {{
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
         }}
         .trending-ticker {{
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
         }}
-        .trending-watchlist {{
-            font-size: 0.85rem;
-            opacity: 0.9;
+        .trending-social {{
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }}
         .trending-price {{
             font-weight: 600;
+            color: var(--text-primary);
         }}
         .trending-change.positive {{
-            color: #86efac;
+            color: #22c55e;
         }}
         .trending-change.negative {{
-            color: #fca5a5;
+            color: #ef4444;
         }}
     </style>
 </head>
@@ -1722,7 +1756,7 @@ def generate_ticker_pages(results):
                 <h3>📊 Analyse</h3>
                 <p><strong>Setup Type:</strong> {r['setup_type']}</p>
                 <p><strong>Sentiment:</strong> {r['sentiment_summary']} (Score: {r['sentiment_score']:.2f})</p>
-                {f"<p><strong>🔥 Trending op StockTwits:</strong> {r.get('stocktwits_watchlist', 0):,} volgers</p>" if r.get('is_trending') else ""}
+                {f"<p><strong>💬 Trending op Social Media:</strong> {r.get('stocktwits_watchlist', 0):,} volgers</p>" if r.get('is_trending') else ""}
                 
                 <h4 style="margin-top: 1.5rem; margin-bottom: 0.75rem;">Redenen</h4>
                 <ul class="reasons-list">
