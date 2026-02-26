@@ -263,28 +263,73 @@ NEGATIVE_KEYWORDS = [
     'rechtszaak', 'onderzoek', 'boete', 'terugroep', 'storing', 'fout'
 ]
 
-# RSS Feeds (gratis) - uitgebreid voor meer nieuwsbronnen
+# RSS Feeds (gratis) - Wereldwijd nieuws
 RSS_FEEDS = {
-    # Algemeen markt nieuws
+    # ========== NOORD-AMERIKA ==========
     'marketwatch': 'https://feeds.marketwatch.com/marketwatch/topstories/',
     'reuters_business': 'https://www.reutersagency.com/feed/',
     'yahoo_finance': 'https://finance.yahoo.com/news/rssindex',
-    'investing_general': 'https://www.investing.com/rss/news.rss',
-    # Sector specifiek
-    'tech_crunch': 'https://techcrunch.com/feed/',
-    'reuters_technology': 'https://www.reutersagency.com/feed/?post_type=best&taxonomy=topic&term=technology',
-    'seeking_alpha': 'https://seekingalpha.com/feed.xml',
-    # Financieel nieuws
     'bloomberg_markets': 'https://feeds.bloomberg.com/markets/news.rss',
     'cnbc_top_news': 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114',
-    'financial_times': 'https://www.ft.com/?format=rss',
-    # Crypto & Specifiek
-    'coindesk': 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+    'seeking_alpha': 'https://seekingalpha.com/feed.xml',
     'benzinga': 'https://www.benzinga.com/news/feed',
+    'barrons': 'https://www.barrons.com/xml/rss/',
+    'motley_fool': 'https://www.fool.com/feeds/latest/',
+    
+    # ========== EUROPA ==========
+    'financial_times': 'https://www.ft.com/?format=rss',
+    'reuters_uk': 'https://www.reutersagency.com/feed/?post_type=best&taxonomy=topic&term=uk',
+    'reuters_deutschland': 'https://de.reuters.com/news/rss',
+    'handelsblatt': 'https://www.handelsblatt.com/content/feed/rss',
+    'les_echos': 'https://www.lesechos.fr/finance-medias/rss',
+    'il_sole_24_ore': 'https://www.ilsole24ore.com/rss/italia.xml',
+    'expansion': 'https://www.expansion.com/rss/economia.html',
+    
+    # ========== AZIË - CHINA ==========
+    'china_daily': 'http://www.chinadaily.com.cn/rss/business.xml',
+    'scmp_business': 'https://www.scmp.com/rss/311643/feed',
+    'xinhua_business': 'http://www.xinhuanet.com/english/rss/businessrss.xml',
+    'caixin': 'https://www.caixinglobal.com/rss/',
+    
+    # ========== AZIË - JAPAN ==========
+    'nikkei_asia': 'https://asia.nikkei.com/rss',
+    'japan_times': 'https://www.japantimes.co.jp/feed/',
+    'nhk_world': 'https://www3.nhk.or.jp/nhkworld/en/news/rss/',
+    
+    # ========== AZIË - ZUID-KOREA ==========
+    'korea_herald': 'http://www.koreaherald.com/common/rss_xml.php?mt=business',
+    'korea_times': 'https://www.koreatimes.co.kr/rss/business',
+    
+    # ========== AZIË - ZUID-OOST ==========
+    'straits_times': 'https://www.straitstimes.com/rss/singapore-business-news',
+    'bangkok_post': 'https://www.bangkokpost.com/rss/business',
+    
+    # ========== AUSTRALIË & OCEANIË ==========
+    'australian_financial_review': 'https://www.afr.com/rss',
+    'abc_news_au': 'https://www.abc.net.au/news/feed/46182/rss.xml',
+    'sydney_morning_herald': 'https://www.smh.com.au/rss/feed/business.xml',
+    'nz_herald': 'https://www.nzherald.co.nz/arc/outboundfeeds/rss/section/business/',
+    
+    # ========== MIDDEN-OOSTEN ==========
+    'arabian_business': 'https://www.arabianbusiness.com/politics-economics',
+    'gulf_news': 'https://www.gulfnews.com/business/1.1028906?rssFeed=1',
+    
+    # ========== AFRIKA ==========
+    'business_day_live': 'https://www.businesslive.co.za/bd/rss/',
+    'fin24': 'https://www.fin24.com/rss',
+    
+    # ========== LATIJNS-AMERIKA ==========
+    'valor_economico': 'https://valor.globo.com/rss/',
+    'el_economista': 'https://www.eleconomista.com.mx/rss',
+    
+    # ========== TECH & CRYPTO ==========
+    'tech_crunch': 'https://techcrunch.com/feed/',
+    'coindesk': 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+    'cointelegraph': 'https://cointelegraph.com/rss',
 }
 
 # Aantal headlines om op te halen per feed
-RSS_FEED_LIMIT = 30  # Meer artikelen per feed
+RSS_FEED_LIMIT = 25  # Iets minder per feed vanwege meer bronnen
 
 # ============= STOCKTWITS TRENDING =============
 
@@ -423,32 +468,74 @@ def get_sentiment(ticker, headlines):
     """
     return get_llm_sentiment(ticker, headlines)
 
-def fetch_rss_news():
+def fetch_rss_news(max_age_days=2):
     """
-    Haal nieuws op van gratis RSS feeds.
-    Verzamelt meer artikelen voor betere sentiment analyse.
+    Haal nieuws op van gratis RSS feeds wereldwijd.
+    Filtert op recente artikelen (laatste max_age_days dagen).
     """
+    import datetime
     all_news = []
+    successful_feeds = 0
+    failed_feeds = []
+
+    # Bereken cutoff datum (UTC, timezone-naive voor consistente vergelijking)
+    # Gebruik timezone-aware UTC en converteer naar naive
+    now_utc = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+    cutoff_date = now_utc - datetime.timedelta(days=max_age_days)
 
     for source, url in RSS_FEEDS.items():
         try:
             feed = feedparser.parse(url)
-            # Haal meer artikelen op per feed
-            limit = min(RSS_FEED_LIMIT, len(feed.entries))
-            for entry in feed.entries[:limit]:
-                all_news.append({
-                    'source': source,
-                    'title': entry.title,
-                    'link': entry.link,
-                    'published': entry.get('published', ''),
-                    'summary': entry.get('summary', '')[:500] if entry.get('summary') else ''
-                })
+            if not feed.entries:
+                failed_feeds.append(source)
+                continue
+                
+            successful_feeds += 1
+            for entry in feed.entries[:RSS_FEED_LIMIT]:
+                # Parse publicatie datum
+                published_str = entry.get('published', '')
+                published_date = None
+
+                # Probeer verschillende datum formaten
+                for fmt in ['%a, %d %b %Y %H:%M:%S %Z', '%a, %d %b %Y %H:%M:%S GMT', '%Y-%m-%dT%H:%M:%S%z', '%Y-%m-%d %H:%M:%S']:
+                    try:
+                        published_date = datetime.datetime.strptime(published_str, fmt)
+                        # Maak timezone-naive voor vergelijking
+                        if published_date.tzinfo is not None:
+                            published_date = published_date.replace(tzinfo=None)
+                        break
+                    except (ValueError, TypeError):
+                        continue
+
+                # Als datum parsing faalt, neem artikel dan toch mee (voor fallback)
+                if published_date is None:
+                    all_news.append({
+                        'source': source,
+                        'title': entry.title,
+                        'link': entry.link,
+                        'published': published_str,
+                        'summary': entry.get('summary', '')[:500] if entry.get('summary') else '',
+                        'is_recent': True
+                    })
+                # Filter op recente artikelen
+                elif published_date >= cutoff_date:
+                    all_news.append({
+                        'source': source,
+                        'title': entry.title,
+                        'link': entry.link,
+                        'published': published_str,
+                        'summary': entry.get('summary', '')[:500] if entry.get('summary') else '',
+                        'is_recent': True
+                    })
         except Exception as e:
             # Log alleen belangrijke fouten
             if '404' not in str(e) and 'timeout' not in str(e).lower():
-                print(f"  RSS feed {source}: {e}")
+                failed_feeds.append(source)
 
-    print(f"  Totaal: {len(all_news)} artikelen van {len(RSS_FEEDS)} bronnen")
+    # Toon statistieken
+    recent_count = sum(1 for n in all_news if n.get('is_recent', False))
+    print(f"  Wereldwijd: {len(all_news)} artikelen ({recent_count} recent)")
+    print(f"  ✓ {successful_feeds} feeds succes, {len(failed_feeds)} overgeslagen")
     return all_news
 
 # ============= SCORING =============
@@ -576,9 +663,27 @@ def analyze():
                 print("❌")
                 continue
 
-            # Verzamel headlines van Yahoo Finance
+            # Verzamel headlines van Yahoo Finance met datum filtering
             news = t.news
-            headlines = [n.get('title') for n in news if n.get('title')]
+            headlines = []
+            today = datetime.date.today()
+            
+            for n in news:
+                title = n.get('title')
+                if not title:
+                    continue
+                
+                # Check publicatie datum
+                provider_time = n.get('providerPublishTime', 0)
+                if provider_time:
+                    # Unix timestamp naar datetime
+                    article_date = datetime.datetime.fromtimestamp(provider_time).date()
+                    # Alleen artikelen van vandaag of gisteren
+                    if article_date >= today - datetime.timedelta(days=1):
+                        headlines.append(title)
+                else:
+                    # Geen datum, neem toch mee
+                    headlines.append(title)
 
             # Als Yahoo geen headlines heeft, gebruik dan algemene markt nieuws
             if not headlines:
@@ -717,6 +822,7 @@ def analyze():
     generate_article(results, today)
     generate_watchlist(results, today)
     generate_archive(results, today)
+    generate_ticker_pages(results)
     save_snapshot(snapshot_data, today_str)
     generate_search_data(results, today_str)
 
@@ -870,7 +976,12 @@ def generate_main_site(results, today, trending_stocks=None):
         trending_badge = "🔥" if r.get('is_trending', False) else ""
         market_rows += f"""
         <tr class="stock-row" data-ticker="{r['ticker']}" data-sector="{r['sector']}" data-signal="{r['signal_class']}">
-            <td class="ticker"><strong>{r['ticker']}</strong>{trending_badge}<br><small>{r['name']}</small></td>
+            <td class="ticker">
+                <a href="ticker/{r['ticker']}.html" class="ticker-link">
+                    <strong>{r['ticker']}</strong>{trending_badge}
+                </a>
+                <br><small>{r['name']}</small>
+            </td>
             <td class="sector">{r['sector']}</td>
             <td class="price">€{r['price']:.2f}</td>
             <td class="change {change_class}">{change_sign}{r['change_pct']:.2f}%</td>
@@ -948,6 +1059,21 @@ def generate_main_site(results, today, trending_stocks=None):
     <title>Beurs Cowboy | Markt Analyse | {date_display}</title>
     <link rel="stylesheet" href="assets/styles.css">
     <style>
+        .ticker-link {{
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }}
+        .ticker-link:hover {{
+            color: var(--accent-primary);
+            text-decoration: underline;
+        }}
+        .ticker-link strong {{
+            font-size: 1.1rem;
+        }}
         .trending-section {{
             margin: 2rem 0;
             padding: 1.5rem;
@@ -1353,6 +1479,313 @@ def generate_search_data(results, date_str):
     }
     with open(os.path.join(OUTPUT_DIR, "search-index.json"), "w") as f:
         json.dump(search_index, f, indent=2)
+
+def generate_ticker_pages(results):
+    """Generate individual ticker pages with TradingView widget"""
+    
+    ticker_dir = os.path.join(OUTPUT_DIR, "ticker")
+    os.makedirs(ticker_dir, exist_ok=True)
+    
+    for r in results:
+        ticker = r['ticker']
+        name = r['name']
+        
+        html = f"""<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{ticker} - {name} | Beurs Cowboy</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <style>
+        .ticker-header {{
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }}
+        .ticker-title {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }}
+        .ticker-symbol {{
+            font-size: 2.5rem;
+            font-weight: 700;
+        }}
+        .ticker-name {{
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }}
+        .ticker-price {{
+            text-align: right;
+        }}
+        .price-large {{
+            font-size: 2rem;
+            font-weight: 700;
+        }}
+        .price-change {{
+            font-size: 1.2rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }}
+        .price-change.positive {{
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }}
+        .price-change.negative {{
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }}
+        .tradingview-container {{
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }}
+        .metrics-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }}
+        .metric-card {{
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }}
+        .metric-label {{
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }}
+        .metric-value {{
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }}
+        .signal-badge {{
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }}
+        .signal-badge.buy-strong {{ background: #16a34a; color: white; }}
+        .signal-badge.buy {{ background: #22c55e; color: white; }}
+        .signal-badge.neutral {{ background: #6b7280; color: white; }}
+        .signal-badge.sell {{ background: #f97316; color: white; }}
+        .signal-badge.sell-strong {{ background: #ef4444; color: white; }}
+        .analysis-section {{
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }}
+        .analysis-section h3 {{
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }}
+        .reasons-list {{
+            list-style: none;
+            padding: 0;
+        }}
+        .reasons-list li {{
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }}
+        .reasons-list li:last-child {{
+            border-bottom: none;
+        }}
+        .back-link {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-primary);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }}
+        .back-link:hover {{
+            text-decoration: underline;
+        }}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="../index.html" class="logo-link">
+                    <span class="logo-icon">🤠</span>
+                    <span class="logo-text">Beurs<span class="highlight">Cowboy</span></span>
+                </a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="main-nav" id="mainNav">
+                <a href="../index.html">Markten</a>
+                <a href="../analysis.html">Analyse</a>
+                <a href="../watchlist.html">Watchlist</a>
+                <a href="../archive.html">Archief</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="content-section">
+            <a href="../index.html#complete-markt" class="back-link">
+                ← Terug naar overzicht
+            </a>
+
+            <!-- Ticker Header -->
+            <div class="ticker-header">
+                <div class="ticker-title">
+                    <div>
+                        <div class="ticker-symbol">{ticker}</div>
+                        <div class="ticker-name">{name}</div>
+                    </div>
+                    <span class="signal-badge {r['signal_class']}">{r['signal']}</span>
+                </div>
+                <div class="ticker-price">
+                    <div class="price-large">€{r['price']:.2f}</div>
+                    <div class="price-change {'positive' if r['change_pct'] >= 0 else 'negative'}">
+                        {'+' if r['change_pct'] >= 0 else ''}{r['change_pct']:.2f}%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">RSI</div>
+                    <div class="metric-value">{r['rsi']:.1f}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">MACD</div>
+                    <div class="metric-value">{r['macd']:.4f}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Setup Score</div>
+                    <div class="metric-value">{r['setup_score']:.1f}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Potentieel</div>
+                    <div class="metric-value">+{r['potential_upside']:.1f}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">52 Week Hoog</div>
+                    <div class="metric-value">€{r['high_52w']:.2f}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">52 Week Laag</div>
+                    <div class="metric-value">€{r['low_52w']:.2f}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">SMA 20</div>
+                    <div class="metric-value">€{r['sma_20']:.2f}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">SMA 50</div>
+                    <div class="metric-value">€{r['sma_50']:.2f}</div>
+                </div>
+            </div>
+
+            <!-- TradingView Chart -->
+            <div class="tradingview-container">
+                <h3>📈 TradingView Chart</h3>
+                <div class="tradingview-widget-container">
+                    <div id="tradingview_{ticker}"></div>
+                </div>
+            </div>
+
+            <!-- Analysis -->
+            <div class="analysis-section">
+                <h3>📊 Analyse</h3>
+                <p><strong>Setup Type:</strong> {r['setup_type']}</p>
+                <p><strong>Sentiment:</strong> {r['sentiment_summary']} (Score: {r['sentiment_score']:.2f})</p>
+                {f"<p><strong>🔥 Trending op StockTwits:</strong> {r.get('stocktwits_watchlist', 0):,} volgers</p>" if r.get('is_trending') else ""}
+                
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.75rem;">Redenen</h4>
+                <ul class="reasons-list">
+                    {"".join([f"<li>✓ {reason}</li>" for reason in r['setup_reasons']])}
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>🤠 Beurs Cowboy</h4>
+                    <p>Dagelijkse beursanalyse met een westelijk tintje. AI-powered, cowboy-goedgekeurd.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Disclaimer</h4>
+                    <p>Dit is geen financieel advies. Trading is als het wilde westen - er zijn schurken en er zijn sheriffs. Wees een sheriff.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Beurs Cowboy. Yeehaw! 🤠 Alle rechten voorbehouden.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+        new TradingView.widget({{
+            "width": "100%",
+            "height": 500,
+            "symbol": "{ticker}",
+            "interval": "D",
+            "timezone": "Europe/Amsterdam",
+            "theme": "dark",
+            "style": "1",
+            "locale": "nl",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "allow_symbol_change": true,
+            "container_id": "tradingview_{ticker}",
+            "hide_side_toolbar": false,
+            "studies": [
+                "RSI@tv-basicstudies",
+                "MACD@tv-basicstudies",
+                "Moving Average@tv-basicstudies"
+            ]
+        }});
+    </script>
+
+    <script src="../assets/main.js"></script>
+</body>
+</html>"""
+        
+        # Schrijf naar bestand
+        output_path = os.path.join(ticker_dir, f"{ticker}.html")
+        with open(output_path, "w") as f:
+            f.write(html)
+    
+    print(f"  ✓ {len(results)} ticker pagina's gegenereerd in {ticker_dir}/")
 
 def generate_archive(results, today):
     """Generate archive.html - overview of all past analyses"""
