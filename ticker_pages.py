@@ -131,7 +131,7 @@ def _generate_complete_ticker_page(r: Dict) -> str:
                             </div>
                             <div class="metric">
                                 <span class="metric-label">SMA 50</span>
-                                <span class="metric-value">€{r['sma_50']:.2f if r['sma_50'] else 'N/A'}</span>
+                                <span class="metric-value">€{r['sma_50']:.2f}</span>
                             </div>
                             <div class="metric">
                                 <span class="metric-label">52W Hoog</span>

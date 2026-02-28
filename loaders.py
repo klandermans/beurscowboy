@@ -175,17 +175,11 @@ def generate_archive(
 
 
 def generate_ticker_pages(results: List[Dict], output_dir: str) -> None:
-    """Generate individual ticker pages"""
-    ticker_dir = os.path.join(output_dir, "ticker")
-    os.makedirs(ticker_dir, exist_ok=True)
+    """Generate individual ticker pages - delegated to ticker_pages module"""
+    # Import hier om circulaire imports te voorkomen
+    from ticker_pages import generate_ticker_pages as generate
     
-    for r in results:
-        html = _generate_ticker_page_html(r)
-        output_path = os.path.join(ticker_dir, f"{r['ticker']}.html")
-        with open(output_path, "w") as f:
-            f.write(html)
-    
-    print(f"  ✓ {len(results)} ticker pagina's gegenereerd")
+    generate(results, output_dir)
 
 
 def save_snapshot(
