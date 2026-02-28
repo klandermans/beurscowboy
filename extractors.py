@@ -182,20 +182,35 @@ def fetch_rss_news(
 
 def fetch_ticker_data(
     tickers: List[str],
-    max_headlines: int = 10
+    max_headlines: int = 10,
+    market_news: List[Dict] = None
 ) -> Tuple[Dict[str, Any], Dict[str, List[str]]]:
     """
     Fetch ticker data and headlines from Yahoo Finance.
+    Uses RSS news as fallback for tickers with limited headlines.
     
     Args:
         tickers: List of ticker symbols
         max_headlines: Max headlines per ticker
+        market_news: Optional pre-fetched market news for fallback
     
     Returns:
         Tuple of (ticker_data, ticker_headlines)
     """
     ticker_data = {}
     ticker_headlines = {}
+    
+    # Create ticker-specific news from market news if available
+    ticker_news_fallback = {}
+    if market_news:
+        for article in market_news[:50]:  # Use top 50 market articles
+            title = article['title']
+            # Try to match tickers in title
+            for ticker in tickers:
+                if ticker in title or ticker.lower() in title.lower():
+                    if ticker not in ticker_news_fallback:
+                        ticker_news_fallback[ticker] = []
+                    ticker_news_fallback[ticker].append(title)
     
     for ticker in tickers:
         try:
@@ -215,9 +230,22 @@ def fetch_ticker_data(
                 if title:
                     headlines.append(title)
             
-            # If Yahoo has no news, use fallback message
+            # Supplement with market news if Yahoo has few headlines
+            if len(headlines) < max_headlines and ticker in ticker_news_fallback:
+                for fb_title in ticker_news_fallback[ticker]:
+                    if fb_title not in headlines:
+                        headlines.append(f"{ticker}: {fb_title}")
+                    if len(headlines) >= max_headlines:
+                        break
+            
+            # Final fallback: general market news
+            if len(headlines) < 3 and market_news:
+                for article in market_news[:max_headlines - len(headlines)]:
+                    headlines.append(f"{ticker} - {article['title']}")
+            
+            # Last resort fallback
             if not headlines:
-                headlines = [f"{ticker} - Geen specifiek nieuws vandaag"]
+                headlines = [f"{ticker} - Markt update vandaag"]
             
             ticker_headlines[ticker] = headlines[:max_headlines]
 

@@ -38,7 +38,8 @@ def generate_main_site(
     top_picks = [r for r in results if r['setup_score'] >= 2][:5]
     
     # Generate HTML sections
-    market_rows = _generate_market_rows(results[:10])
+    ticker_tape = _generate_ticker_tape(results)  # NEW: Lichtkrant
+    market_rows = _generate_market_rows(results)  # ALL results, not just top 10
     analysis_cards = _generate_analysis_cards(top_picks[:3], date_str)
     macro_section = _generate_macro_section(regional_sentiment)
     trending_section = _generate_trending_section(trending_stocks)
@@ -70,11 +71,14 @@ def generate_main_site(
         </div>
     </header>
 
+    <!-- LICHTKRANT / TICKER TAPE -->
+    {ticker_tape}
+
     <main class="main-content">
         <section class="content-section">
             <div class="section-header">
                 <h1>Markt Analyse</h1>
-                <p class="section-subtitle">{date_display}</p>
+                <p class="section-subtitle">{date_display} - {len(results)} aandelen geanalyseerd</p>
             </div>
 
             <!-- Macro Sentiment -->
@@ -91,13 +95,20 @@ def generate_main_site(
                 </div>
             </div>
 
-            <!-- Complete Market Table -->
+            <!-- Complete Market Table - ALLE AANDELEN -->
             <div class="market-table-section">
-                <h2 class="section-title">Complete Markt</h2>
+                <h2 class="section-title">Complete Markt ({len(results)} aandelen)</h2>
+                <div class="table-filters">
+                    <button class="filter-btn active" data-filter="all">Alle</button>
+                    <button class="filter-btn" data-filter="buy">Koop</button>
+                    <button class="filter-btn" data-filter="neutral">Neutraal</button>
+                    <button class="filter-btn" data-filter="sell">Verkoop</button>
+                </div>
                 <div class="table-container">
                     <table class="market-table">
                         <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Aandeel</th>
                                 <th>Sector</th>
                                 <th>Prijs</th>
@@ -105,6 +116,7 @@ def generate_main_site(
                                 <th>Volume</th>
                                 <th>RSI</th>
                                 <th>Signal</th>
+                                <th>Setup Score</th>
                                 <th>Potentieel</th>
                             </tr>
                         </thead>
@@ -217,16 +229,111 @@ def generate_search_data(
 # HELPER FUNCTIONS
 # =============================================================================
 
+def _generate_ticker_tape(results: List[Dict]) -> str:
+    """Generate scrolling ticker tape (lichtkrant)"""
+    if not results:
+        return ""
+    
+    # Take top 30 by setup_score for the tape
+    tape_stocks = results[:30]
+    
+    tape_items = ""
+    for r in tape_stocks:
+        change_class = "up" if r['change_pct'] >= 0 else "down"
+        change_sign = "+" if r['change_pct'] >= 0 else ""
+        signal_emoji = "🟢" if "Koop" in r['signal'] else "🔴" if "Verkoop" in r['signal'] else "⚪"
+        
+        tape_items += f"""
+        <div class="ticker-tape-item {change_class}">
+            <span class="tape-ticker">{r['ticker']}</span>
+            <span class="tape-price">€{r['price']:.2f}</span>
+            <span class="tape-change {change_class}">{change_sign}{r['change_pct']:.1f}%</span>
+            <span class="tape-signal">{signal_emoji}</span>
+        </div>"""
+    
+    # Duplicate for seamless loop
+    tape_items_doubled = tape_items * 2
+    
+    return f"""
+    <div class="ticker-tape-container">
+        <div class="ticker-tape">
+            {tape_items_doubled}
+        </div>
+    </div>
+    
+    <style>
+        .ticker-tape-container {{
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            border-bottom: 2px solid #0ea5e9;
+            padding: 0.75rem 0;
+            overflow: hidden;
+            position: relative;
+        }}
+        .ticker-tape {{
+            display: flex;
+            gap: 2rem;
+            animation: scroll 60s linear infinite;
+            white-space: nowrap;
+        }}
+        .ticker-tape:hover {{
+            animation-play-state: paused;
+        }}
+        @keyframes scroll {{
+            0% {{ transform: translateX(0); }}
+            100% {{ transform: translateX(-50%); }}
+        }}
+        .ticker-tape-item {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }}
+        .ticker-tape-item .tape-ticker {{
+            font-weight: 700;
+            color: #fff;
+        }}
+        .ticker-tape-item .tape-price {{
+            color: #94a3b8;
+        }}
+        .ticker-tape-item .tape-change.up {{
+            color: #4ade80;
+            font-weight: 600;
+        }}
+        .ticker-tape-item .tape-change.down {{
+            color: #f87171;
+            font-weight: 600;
+        }}
+        .ticker-tape-item .tape-signal {{
+            font-size: 1rem;
+        }}
+        @media (max-width: 768px) {{
+            .ticker-tape {{
+                animation-duration: 40s;
+            }}
+            .ticker-tape-item {{
+                font-size: 0.8rem;
+                gap: 0.35rem;
+            }}
+        }}
+    </style>"""
+
+
 def _generate_market_rows(results: List[Dict]) -> str:
-    """Generate market table rows"""
+    """Generate market table rows - ALL tickers"""
     rows = ""
-    for r in results:
+    for i, r in enumerate(results, 1):
         change_class = "positive" if r['change_pct'] >= 0 else "negative"
         change_sign = "+" if r['change_pct'] >= 0 else ""
         trending_badge = "🔥" if r.get('is_trending') else ""
+        signal_class = r['signal_class']
         
         rows += f"""
-        <tr class="stock-row">
+        <tr class="stock-row" data-signal="{signal_class}">
+            <td class="rank">{i}</td>
             <td class="ticker">
                 <a href="ticker/{r['ticker']}.html" class="ticker-link">
                     <strong>{r['ticker']}</strong>{trending_badge}
@@ -238,9 +345,88 @@ def _generate_market_rows(results: List[Dict]) -> str:
             <td class="change {change_class}">{change_sign}{r['change_pct']:.2f}%</td>
             <td class="volume">{r['volume']:,}</td>
             <td class="rsi">{r['rsi']:.1f}</td>
-            <td class="signal {r['signal_class']}">{r['signal']}</td>
+            <td class="signal {signal_class}">{r['signal']}</td>
+            <td class="score">{r['setup_score']:.1f}</td>
             <td class="upside">+{r['potential_upside']:.1f}%</td>
         </tr>"""
+    
+    # Add CSS for new columns and filters
+    rows += """
+    <style>
+        .table-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .table-filters .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .table-filters .filter-btn:hover,
+        .table-filters .filter-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        .market-table .rank {
+            font-weight: 600;
+            color: var(--text-muted);
+            width: 40px;
+            text-align: center;
+        }
+        .market-table .score {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .stock-row[data-signal="buy-strong"] .score,
+        .stock-row[data-signal="buy"] .score {
+            color: #22c55e;
+        }
+        .stock-row[data-signal="sell-strong"] .score,
+        .stock-row[data-signal="sell"] .score {
+            color: #ef4444;
+        }
+        /* Hide rows based on filter */
+        .stock-row.hidden {
+            display: none;
+        }
+    </style>
+    
+    <script>
+        // Table filtering
+        document.querySelectorAll('.table-filters .filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.table-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                document.querySelectorAll('.stock-row').forEach(row => {
+                    if (filter === 'all') {
+                        row.classList.remove('hidden');
+                    } else {
+                        const signal = row.dataset.signal;
+                        if (filter === 'buy' && (signal === 'buy' || signal === 'buy-strong')) {
+                            row.classList.remove('hidden');
+                        } else if (filter === 'neutral' && signal === 'neutral') {
+                            row.classList.remove('hidden');
+                        } else if (filter === 'sell' && (signal === 'sell' || signal === 'sell-strong' || signal === 'watch')) {
+                            row.classList.remove('hidden');
+                        } else {
+                            row.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    """
     
     return rows
 

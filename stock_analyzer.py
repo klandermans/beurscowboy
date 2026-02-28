@@ -14,7 +14,10 @@ from config import (
     TECHNICAL_PARAMS, SCORING_WEIGHTS, TICKERS, COMPANY_NAMES, SECTORS,
     SETTINGS
 )
-from extractors import fetch_rss_news, fetch_stocktwits_trending, fetch_ticker_data
+from extractors import (
+    fetch_rss_news, fetch_stocktwits_trending, fetch_ticker_data,
+    get_all_tickers
+)
 from transformers import (
     calculate_technical_indicators, calculate_setup_score,
     calculate_potential_upside, get_trade_setup_type, get_signal
@@ -59,8 +62,8 @@ class MarketAnalyzer:
         
         # EXTRACT: Verzamel ruwe data
         logger.info("\n📥 EXTRACT PHASE")
-        ticker_data, ticker_headlines = self._extract_ticker_data()
-        market_news, regional_news = self._extract_news()
+        market_news, regional_news = self._extract_news()  # Fetch news FIRST
+        ticker_data, ticker_headlines = self._extract_ticker_data(market_news)  # Pass news
         trending_symbols = self._extract_social_sentiment()
         
         # TRANSFORM: Verwerk en verrijk data
@@ -83,10 +86,15 @@ class MarketAnalyzer:
         
         logger.info(f"\n✅ Analysis complete - Output in {self.output_dir}/")
     
-    def _extract_ticker_data(self) -> Tuple[Dict, Dict]:
+    def _extract_ticker_data(self, market_news: List[Dict] = None) -> Tuple[Dict, Dict]:
         """Extract: Haal ticker data en headlines op"""
         logger.info("  Fetching ticker data...")
-        return fetch_ticker_data(TICKERS, SETTINGS['max_headlines_per_ticker'])
+        
+        # Get all tickers (base + discovered)
+        tickers = get_all_tickers()
+        logger.info(f"  Analyzing {len(tickers)} tickers (base: {len(TICKERS)}, discovered: {len(tickers) - len(TICKERS)})")
+        
+        return fetch_ticker_data(tickers, SETTINGS['max_headlines_per_ticker'], market_news)
     
     def _extract_news(self) -> Tuple[List[Dict], Dict[str, List[Dict]]]:
         """Extract: Haal RSS nieuws op"""
