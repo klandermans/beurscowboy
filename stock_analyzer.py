@@ -28,8 +28,9 @@ from analyzers import (
 )
 from loaders import (
     generate_main_site, generate_article, generate_watchlist,
-    generate_archive, generate_ticker_pages, save_snapshot, generate_search_data
+    generate_archive, save_snapshot, generate_search_data
 )
+from ticker_pages import generate_ticker_pages
 
 # Configure logging
 logging.basicConfig(
