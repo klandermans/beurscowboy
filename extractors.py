@@ -15,7 +15,60 @@ import urllib.request
 import json
 from typing import Dict, List, Tuple, Any, Optional
 
-from config import RSS_FEEDS, REGIONAL_FEEDS
+from config import RSS_FEEDS, REGIONAL_FEEDS, TICKERS, TICKER_DISCOVER, DISCOVER_SETTINGS
+
+
+def get_all_tickers() -> List[str]:
+    """
+    Get complete list of tickers including discovered ones.
+    
+    Returns:
+        Combined list of base tickers and discovered tickers
+    """
+    all_tickers = set(TICKERS)
+    
+    if not DISCOVER_SETTINGS.get('enabled', True):
+        return list(all_tickers)
+    
+    # Add tickers from discovery categories
+    for category, tickers in TICKER_DISCOVER.items():
+        for ticker in tickers:
+            # Validate ticker before adding
+            if _validate_ticker(ticker):
+                all_tickers.add(ticker)
+    
+    # Remove duplicates and limit
+    return list(all_tickers)[:DISCOVER_SETTINGS.get('max_tickers', 200)]
+
+
+def _validate_ticker(ticker: str) -> bool:
+    """
+    Quick validation if ticker exists and is tradeable.
+    
+    Args:
+        ticker: Ticker symbol to validate
+    
+    Returns:
+        True if valid, False otherwise
+    """
+    try:
+        t = yf.Ticker(ticker)
+        hist = t.history(period='1d')
+        
+        if hist.empty:
+            return False
+        
+        # Check minimum price and volume
+        price = hist['Close'].iloc[-1]
+        volume = hist['Volume'].iloc[-1]
+        
+        min_price = DISCOVER_SETTINGS.get('min_price', 1.0)
+        min_volume = DISCOVER_SETTINGS.get('min_volume', 100000)
+        
+        return price >= min_price and volume >= min_volume
+        
+    except Exception:
+        return False
 
 
 def fetch_rss_news(
@@ -153,27 +206,20 @@ def fetch_ticker_data(
                 print(f"  {ticker}... ❌")
                 continue
 
-            # Get headlines
+            # Get headlines from Yahoo Finance news
             news = t.news
-            headlines = [n.get('title') for n in news if n.get('title')]
+            headlines = []
             
-            # Filter by date (last 2 days)
-            today = datetime.date.today()
-            filtered_headlines = []
             for n in news:
                 title = n.get('title')
-                if not title:
-                    continue
-                
-                provider_time = n.get('providerPublishTime', 0)
-                if provider_time:
-                    article_date = datetime.datetime.fromtimestamp(provider_time).date()
-                    if article_date >= today - datetime.timedelta(days=1):
-                        filtered_headlines.append(title)
-                else:
-                    filtered_headlines.append(title)
+                if title:
+                    headlines.append(title)
             
-            ticker_headlines[ticker] = filtered_headlines[:max_headlines]
+            # If Yahoo has no news, use fallback message
+            if not headlines:
+                headlines = [f"{ticker} - Geen specifiek nieuws vandaag"]
+            
+            ticker_headlines[ticker] = headlines[:max_headlines]
 
             ticker_data[ticker] = {
                 'hist': hist,
@@ -182,7 +228,7 @@ def fetch_ticker_data(
                 'news': news,
                 'ticker_obj': t
             }
-            print(f"  {ticker}... ✓ {len(filtered_headlines)} headlines")
+            print(f"  {ticker}... ✓ {len(headlines)} headlines")
 
         except Exception as e:
             print(f"  {ticker}... ❌ {e}")

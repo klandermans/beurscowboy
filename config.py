@@ -149,8 +149,9 @@ SCORING_WEIGHTS = {
 }
 
 # =============================================================================
-# STOCK TICKERS
+# STOCK TICKERS - BASIS LIJST
 # =============================================================================
+# Deze lijst kan worden uitgebreid met TICKER_DISCOVER voor dynamische ontdekking
 
 TICKERS = [
     # Mega Cap Tech
@@ -210,6 +211,36 @@ TICKERS = [
     # Defense
     'LMT', 'RTX', 'NOC', 'GD',
 ]
+
+# =============================================================================
+# DYNAMIC TICKER DISCOVERY
+# =============================================================================
+# Voeg hier extra tickers toe die automatisch ontdekt moeten worden
+
+TICKER_DISCOVER = {
+    # Populaire ETFs voor markt sentiment
+    'etfs': ['SPY', 'QQQ', 'IWM', 'DIA', 'VTI', 'VOO'],
+    
+    # Populaire growth stocks
+    'growth': ['COIN', 'RBLX', 'U', 'PATH', 'HOOD', 'SOFI'],
+    
+    # European stocks (via Yahoo)
+    'europe': ['ASML.AS', 'SAP.DE', 'NESN.SW', 'NOVN.SW', 'AZN.L'],
+    
+    # Crypto related
+    'crypto': ['COIN', 'MARA', 'RIOT', 'CLSK', 'HUT', 'GBTC'],
+}
+
+# =============================================================================
+# AUTO-DISCOVER SETTINGS
+# =============================================================================
+
+DISCOVER_SETTINGS = {
+    'enabled': True,  # Automatische ticker ontdekking
+    'min_volume': 100000,  # Minimale dagelijkse volume
+    'min_price': 1.0,  # Minimale prijs
+    'max_tickers': 200,  # Maximum aantal tickers totaal
+}
 
 # =============================================================================
 # COMPANY NAMES & SECTORS
