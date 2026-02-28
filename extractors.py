@@ -20,77 +20,30 @@ from config import RSS_FEEDS, REGIONAL_FEEDS, TICKERS, TICKER_DISCOVER, DISCOVER
 
 def get_all_tickers() -> List[str]:
     """
-    Get complete list of tickers dynamically.
-    Discovers tickers from multiple sources:
-    - Base configuration
-    - Yahoo Finance most active
-    - Sector ETFs holdings
-    - StockTwits trending
+    Get complete list of tickers.
+    Currently uses static configuration + TICKER_DISCOVER.
+    Auto-discovery disabled due to API limitations.
     
     Returns:
-        Combined list of all discovered tickers
+        Combined list of all tickers
     """
     all_tickers = set(TICKERS)
     
     if not DISCOVER_SETTINGS.get('enabled', True):
         return list(all_tickers)
     
-    # Discover from StockTwits trending
-    print("  Discovering trending tickers...")
-    trending = _discover_stocktwits_trending()
-    all_tickers.update(trending)
-    
-    # Discover from Yahoo Finance most active
-    print("  Discovering most active tickers...")
-    most_active = _discover_yahoo_most_active()
-    all_tickers.update(most_active)
-    
-    # Add from discovery categories
+    # Add from discovery categories (static)
+    added = 0
     for category, tickers in TICKER_DISCOVER.items():
         for ticker in tickers:
             if _validate_ticker(ticker):
                 all_tickers.add(ticker)
+                added += 1
     
-    # Remove duplicates and limit
     result = list(all_tickers)[:DISCOVER_SETTINGS.get('max_tickers', 200)]
-    print(f"  ✓ Discovered {len(result)} total tickers")
+    print(f"  ✓ Loaded {len(result)} tickers ({added} from discovery)")
     
     return result
-
-
-def _discover_stocktwits_trending(limit: int = 20) -> List[str]:
-    """Discover trending tickers from StockTwits"""
-    try:
-        url = "https://api.stocktwits.com/api/2/trending/symbols.json"
-        req = urllib.request.Request(
-            url,
-            headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'}
-        )
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode())
-        
-        trending = []
-        for symbol in data.get('symbols', [])[:limit]:
-            ticker = symbol.get('symbol', '')
-            if ticker and len(ticker) <= 5:  # Filter valid tickers
-                trending.append(ticker)
-        
-        return trending
-    except Exception as e:
-        print(f"    ⚠️ StockTwits discovery failed: {e}")
-        return []
-
-
-def _discover_yahoo_most_active(limit: int = 20) -> List[str]:
-    """Discover most active tickers from Yahoo Finance"""
-    try:
-        # Get most active stocks
-        most_active = yf.MostActive()
-        tickers = [stock.symbol for stock in most_active[:limit]]
-        return tickers
-    except Exception as e:
-        print(f"    ⚠️ Yahoo discovery failed: {e}")
-        return []
 
 
 def _validate_ticker(ticker: str) -> bool:

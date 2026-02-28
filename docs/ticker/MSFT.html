@@ -1,12 +1,466 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSFT - Microsoft Corporation | Beurs Cowboy</title>
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
-    <h1>MSFT</h1>
-    <p>Microsoft Corporation</p>
-    <p>Prijs: €392.74</p>
-    <p>Signal: Neutraal</p>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="../index.html" class="logo-link">
+                    <span class="logo-icon">🤠</span>
+                    <span class="logo-text">Beurs<span class="highlight">Cowboy</span></span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="../index.html">Markten</a>
+                <a href="../analysis.html">Analyse</a>
+                <a href="../watchlist.html">Watchlist</a>
+                <a href="../archive.html">Archief</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="content-section">
+            <!-- Back Link -->
+            <a href="../index.html#complete-markt" class="back-link">
+                ← Terug naar overzicht
+            </a>
+
+            <!-- Ticker Header -->
+            <div class="ticker-header">
+                <div class="ticker-title">
+                    <div>
+                        <h1 class="ticker-symbol">MSFT</h1>
+                        <p class="ticker-name">Microsoft Corporation</p>
+                        <span class="ticker-sector">Technologie</span>
+                    </div>
+                    <div class="ticker-signal">
+                        <span class="signal-badge sell">Voorzichtig</span>
+                    </div>
+                </div>
+                <div class="ticker-price-block">
+                    <div class="price-large">€392.74</div>
+                    <div class="price-change negative">
+                        -2.24%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div class="ticker-grid">
+                <!-- Left Column: Chart & News -->
+                <div class="ticker-main">
+                    <!-- TradingView Chart -->
+                    <div class="card">
+                        <h3>📈 TradingView Chart</h3>
+                        <div id="tradingview_chart" style="height: 500px;"></div>
+                    </div>
+
+                    <!-- Recent News -->
+                    <div class="card">
+                        <h3>📰 Recent Nieuws</h3>
+                        <div class="news-list" id="news-container">
+                            <p class="loading">Nieuws laden...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Metrics & Analysis -->
+                <div class="ticker-sidebar">
+                    <!-- Key Metrics -->
+                    <div class="card">
+                        <h3>📊 Key Metrics</h3>
+                        <div class="metrics-grid">
+                            <div class="metric">
+                                <span class="metric-label">RSI (14)</span>
+                                <span class="metric-value ">44.8</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">MACD</span>
+                                <span class="metric-value negative">-14.7840</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">MACD Hist</span>
+                                <span class="metric-value positive">1.7841</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">SMA 20</span>
+                                <span class="metric-value">€402.84</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">SMA 50</span>
+                                <span class="metric-value">€444.47</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">52W Hoog</span>
+                                <span class="metric-value">€552.24</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">52W Laag</span>
+                                <span class="metric-value">€342.17</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Volume</span>
+                                <span class="metric-value">51,276,300</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">ATR</span>
+                                <span class="metric-value">2.5%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Vol Rank</span>
+                                <span class="metric-value">50</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis -->
+                    <div class="card">
+                        <h3>🎯 Analyse</h3>
+                        <div class="analysis-section">
+                            <div class="analysis-row">
+                                <span class="analysis-label">Setup Type:</span>
+                                <span class="analysis-value">Gemengd Signaal</span>
+                            </div>
+                            <div class="analysis-row">
+                                <span class="analysis-label">Setup Score:</span>
+                                <span class="analysis-value score negative">-1.2</span>
+                            </div>
+                            <div class="analysis-row">
+                                <span class="analysis-label">Potentieel:</span>
+                                <span class="analysis-value upside">+3.0%</span>
+                            </div>
+                            <div class="analysis-row">
+                                <span class="analysis-label">Sentiment:</span>
+                                <span class="analysis-value">Overwegend negatief nieuws</span>
+                            </div>
+                            <div class="analysis-row">
+                                <span class="analysis-label">Sentiment Score:</span>
+                                <span class="analysis-value negative">-0.40</span>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Setup Reasons -->
+                    <div class="card">
+                        <h3>✓ Redenen</h3>
+                        <ul class="reasons-list">
+                            <li>MACD bullisch momentum</li><li>Bearish MA alignement</li>
+                        </ul>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="card">
+                        <h3>📈 Positie t.o.v. SMA's</h3>
+                        <div class="sma-position">
+                            <div class="position-below">Onder SMA20 (-2.5%)</div>
+                            <div class="position-below">Onder SMA50 (-11.6%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>🤠 Beurs Cowboy</h4>
+                    <p>Dagelijkse beursanalyse met een westelijk tintje.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Disclaimer</h4>
+                    <p>Dit is geen financieel advies.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- TradingView Widget -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+        new TradingView.widget({
+            "width": "100%",
+            "height": 500,
+            "symbol": "MSFT",
+            "interval": "D",
+            "timezone": "Europe/Amsterdam",
+            "theme": "dark",
+            "style": "1",
+            "locale": "nl",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "allow_symbol_change": true,
+            "container_id": "tradingview_chart",
+            "hide_side_toolbar": false,
+            "studies": [
+                "RSI@tv-basicstudies",
+                "MACD@tv-basicstudies",
+                "Moving Average@tv-basicstudies"
+            ]
+        });
+        
+        // Fetch news dynamically
+        fetch(`https://query1.finance.yahoo.com/v1/test/getnews?category=general&template=bullet&lang=en-US&region=US&symbol=MSFT`)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('news-container');
+                if (data && data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.slice(0, 5).map(item => `
+                        <div class="news-item">
+                            <a href="${item.link}" target="_blank" class="news-title">${item.title}</a>
+                            <div class="news-meta">
+                                <span class="news-source">${item.publisher}</span>
+                                <span class="news-time">${new Date(item.providerPublishTime * 1000).toLocaleDateString('nl-NL')}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="no-news">Geen recent nieuws gevonden</p>';
+                }
+            })
+            .catch(err => {
+                document.getElementById('news-container').innerHTML = '<p class="error">Nieuws niet beschikbaar</p>';
+            });
+    </script>
+
+    <style>
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-primary);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .ticker-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .ticker-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        .ticker-symbol {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+        .ticker-name {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 0.5rem 0 0.25rem 0;
+        }
+        .ticker-sector {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        .ticker-signal {
+            flex-shrink: 0;
+        }
+        .ticker-price-block {
+            text-align: right;
+        }
+        .price-large {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .price-change {
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        .price-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        .price-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        .ticker-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+        }
+        @media (max-width: 1024px) {
+            .ticker-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .card h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .metric {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .metric-value.positive {
+            color: #22c55e;
+        }
+        .metric-value.negative {
+            color: #ef4444;
+        }
+        .metric-value.oversold {
+            color: #f59e0b;
+        }
+        .metric-value.overbought {
+            color: #ef4444;
+        }
+        .analysis-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .analysis-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .analysis-row:last-child {
+            border-bottom: none;
+        }
+        .analysis-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .analysis-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .analysis-value.positive {
+            color: #22c55e;
+        }
+        .analysis-value.negative {
+            color: #ef4444;
+        }
+        .analysis-value.upside {
+            color: #3b82f6;
+        }
+        .reasons-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .reasons-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .reasons-list li:before {
+            content: "✓";
+            color: #22c55e;
+            font-weight: bold;
+        }
+        .reasons-list li:last-child {
+            border-bottom: none;
+        }
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .news-item {
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .news-title {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .news-title:hover {
+            color: var(--accent-primary);
+        }
+        .news-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .sma-position {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .position-above {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #22c55e;
+            padding: 0.75rem;
+            border-radius: 4px;
+            color: #22c55e;
+            font-weight: 600;
+        }
+        .position-below {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            padding: 0.75rem;
+            border-radius: 4px;
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .loading, .no-news, .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+    </style>
+
+    <script src="../assets/main.js"></script>
 </body>
 </html>
